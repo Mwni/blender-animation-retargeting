@@ -56,18 +56,20 @@ class MainPanel(bpy.types.Panel):
 					layout.label(text='Rest Alignment')
 					alignment.draw_panel(layout.box())
 
-					layout.separator()
-					layout.label(text='Corrections')
-					corrections.draw_panel(layout.box())
+					if s.get_alignments_count() > 0:
+						layout.separator()
+						layout.label(text='Corrections')
+						corrections.draw_panel(layout.box())
 
-					layout.separator()
-					layout.label(text='Baking')
-					baking.draw_panel(layout.box())
+						layout.separator()
+						layout.label(text='Baking')
+						baking.draw_panel(layout.box())
 
-					layout.separator()
-					layout.label(text='Options')
-					box = layout.box()
-					box.prop(s, 'disable_drivers', text='Disable Drivers')
+						layout.separator()
+						layout.label(text='Options')
+						box = layout.box()
+						box.prop(s, 'disable_drivers', text='Disable Drivers')
+						
 		else:
 			layout.label(text='No armature selected', icon='ERROR')
 
@@ -213,7 +215,7 @@ class State(bpy.types.PropertyGroup):
 		if self.is_importing:
 			return
 
-		if not self.disable_drivers:
+		if not self.disable_drivers and self.get_alignments_count() > 0:
 			ik.build()
 			drivers.build()
 		else:

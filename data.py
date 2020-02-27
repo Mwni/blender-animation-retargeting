@@ -28,6 +28,7 @@ class BoneMapping(bpy.types.PropertyGroup):
 		self.offset = m['offset']
 
 	def reset_offset(self):
+		self.rest = (1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)
 		self.offset = (1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1)
 
 class BonePose(bpy.types.PropertyGroup):
