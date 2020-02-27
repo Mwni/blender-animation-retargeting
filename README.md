@@ -21,7 +21,7 @@ Assuming you have both your target and source armature in the scene, and have th
 1. Select your target armature and open the add-on panel on the right side of the 3D View (Rarget tab)
 2. Now choose the source armature as 'Source' on the panel
 3. It should say that there are no bone mappings, yet. Go ahead and click 'Create'.
-4. Now map each relevant source bone to the corresponding target. Make sure to map every bone once, otherwise you'll get undefined behaviour.
+4. Now map each relevant source bone to the corresponding target. Make sure to not map any bone multiple times, otherwise you'll get undefined behaviour.
 5. Next you have to set up the rest pose alignment. Click on "Set up", then change the pose of your target armature in a way, that it optimally fits your source armatures rest pose. When done click 'Apply'. ![pose adjusted to fit source's rest pose](https://manuelotto.com/files/retarget/align.png)
 6. The add-on will then automatically create drivers for each bone, and you should be good to go.
 
@@ -32,18 +32,23 @@ If there's significant 'foot-sliding' or odd arm movements, due to anatomical di
 - Correct Hands Position
 
 You will be asked to specify the leg/foot, arm/hand bones respectively. 
-This will create and IK bone setup for the specified limbs whereas the target positionfor the feet/hands is copied over from the source.
-Additionally it will spawn a control empty cube, that allows you to transform the target position as shown in this gif:
+This will create and IK bone setup for the specified limbs whereas the target positions for the feet/hands are copied over from the source.
+Additionally it will spawn a control empty cube, that allows you to transform the target positions as shown in this gif:
 
 ![demonstration of the ik correction transform cube](https://manuelotto.com/files/retarget/ik_lowres.gif)
 
 ### Root Bone Pivot Correction
-Incase the pivot point of your target and sources' root bone is not very much aligned. (On a different height mainly), you can try to enable 'Correct Root Pivot'. This will prevent your character to wobble left/right when there's major hip movement.
+Incase the pivot point of your target and sources' root bone is not very much aligned (different height), you can try to enable 'Correct Root Pivot'. This will prevent your character to wobble left/right when there's major hip movement.
 
 ![difference in root bone pivot location (even though the rigs are scaled to be same height)](https://manuelotto.com/files/retarget/pivot.png)
 
 ## Baking
-For convenience you can bake the source's animation into an action for your target via the add-on. Since the target bones are driven by drivers, you can bake everything youself, if you want. Make sure the check 'Visual Keying', though.
+For convenience you can bake the source's animation into an action for your target via the add-on. 
+
+![section for baking in the add-on panel](https://manuelotto.com/files/retarget/baking.png)
+
+Since the target bones are driven by drivers, you can bake everything youself, if you want. Make sure the check 'Visual Keying' if you do so.
+
 Ignore the 'Batch Import & Bake' option. (It covers my personal needs)
 
 *Important: After baking your animation, make sure to check 'Disable Drivers' to actually see the keyframes, otherwise the drivers will override any animation on the target.*
