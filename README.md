@@ -13,7 +13,9 @@ This addon enables the transfer of animations and poses from one rig to another.
 
 ## How to use
 Assuming you have both your target and source armature in the scene, and have them aligned and scaled to match each other. 
+
 *Note: The target's scale has to be (1, 1, 1), scale the source to fit the target*
+
 ![Both armatures in rest pose next to each other, scaled to be same height](https://manuelotto.com/files/retarget/setup.png)
 
 1. Select your target armature and open the add-on panel on the right side of the 3D View (Rarget tab)
@@ -32,10 +34,12 @@ If there's significant 'foot-sliding' or odd arm movements, due to anatomical di
 You will be asked to specify the leg/foot, arm/hand bones respectively. 
 This will create and IK bone setup for the specified limbs whereas the target positionfor the feet/hands is copied over from the source.
 Additionally it will spawn a control empty cube, that allows you to transform the target position as shown in this gif:
-![demonstration of the ik correction transform cube](https://manuelotto.com/files/retarget/ik.gif)
+
+![demonstration of the ik correction transform cube](https://manuelotto.com/files/retarget/ik_control.gif)
 
 ### Root Bone Pivot Correction
 Incase the pivot point of your target and sources' root bone is not very much aligned. (On a different height mainly), you can try to enable 'Correct Root Pivot'. This will prevent your character to wobble left/right when there's major hip movement.
+
 ![difference in root bone pivot location (even though the rigs are scaled to be same height)](https://manuelotto.com/files/retarget/pivot.png)
 
 ## Baking
