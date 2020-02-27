@@ -35,7 +35,7 @@ You will be asked to specify the leg/foot, arm/hand bones respectively.
 This will create and IK bone setup for the specified limbs whereas the target positionfor the feet/hands is copied over from the source.
 Additionally it will spawn a control empty cube, that allows you to transform the target position as shown in this gif:
 
-![demonstration of the ik correction transform cube](https://manuelotto.com/files/retarget/ik_control.gif)
+![demonstration of the ik correction transform cube](https://manuelotto.com/files/retarget/ik_transform.gif)
 
 ### Root Bone Pivot Correction
 Incase the pivot point of your target and sources' root bone is not very much aligned. (On a different height mainly), you can try to enable 'Correct Root Pivot'. This will prevent your character to wobble left/right when there's major hip movement.
