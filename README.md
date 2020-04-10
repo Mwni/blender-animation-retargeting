@@ -47,7 +47,7 @@ For convenience you can bake the source's animation into an action for your targ
 
 ![section for baking in the add-on panel](https://manuelotto.com/files/retarget/baking.png)
 
-Since the target bones are driven by drivers, you can bake everything youself, if you want. Make sure the check 'Visual Keying' if you do so.
+Since the target bones are driven by drivers, you can bake everything youself, if you want. Make sure to check 'Visual Keying' if you do so.
 
 Ignore the 'Batch Import & Bake' option. (It covers my personal needs)
 
@@ -57,4 +57,3 @@ Ignore the 'Batch Import & Bake' option. (It covers my personal needs)
 
 - Intended and tested for bipeds with similar anatomy only.
 - Blender's IK system can be weird sometimes
-- I created this add-on because I needed its functionality for my own projects, It's published out of courtesy, so don't expect major support
