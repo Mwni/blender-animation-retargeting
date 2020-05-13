@@ -18,7 +18,7 @@ Assuming you have both your target and source armature in the scene, and have th
 
 ![Both armatures in rest pose next to each other, scaled to be same height](https://manuelotto.com/files/retarget/setup.png)
 
-1. Select your target armature and open the add-on panel on the right side of the 3D View (Rarget tab)
+1. Select your target armature and open the add-on panel on the right side of the 3D View (Retarget tab)
 2. Now choose the source armature as 'Source' on the panel
 3. It should say that there are no bone mappings, yet. Go ahead and click 'Create'.
 4. Now map each relevant source bone to the corresponding target. Make sure to not map any bone multiple times, otherwise you'll get undefined behaviour.
