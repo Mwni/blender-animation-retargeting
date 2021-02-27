@@ -138,8 +138,7 @@ class State(bpy.types.PropertyGroup):
 
 				return
 
-			self.source = self.selected_source
-
+		self.source = self.selected_source
 		self.update_drivers()
 
 
