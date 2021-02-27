@@ -10,7 +10,6 @@ This addon enables the transfer of animations and poses from one rig to another.
 4. Enable the Add-on, which will appear in the list
 
 
-
 ## How to use
 Assuming you have both your target and source armature in the scene, and have them aligned and scaled to match each other. 
 
