@@ -42,7 +42,7 @@ Incase the pivot point of your target and sources' root bone is not very much al
 ![difference in root bone pivot location (even though the rigs are scaled to be same height)](https://mwni.io/opensource/blender-retarget/pivot.png)
 
 ## Baking
-For convenience you can bake the source's animation into an action for your target via the add-on. 
+For convenience you can bake the source's animation into an action for your target via the add-on. The option "Linear Interpolation" causes the F-Curves between the keyframes to be linearized instead of the default Blender Bezier interpolation.
 
 ![section for baking in the add-on panel](https://mwni.io/opensource/blender-retarget/baking.png)
 
