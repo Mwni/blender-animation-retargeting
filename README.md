@@ -21,7 +21,7 @@ Assuming you have both your target and source armature in the scene, and have th
 2. Now choose the source armature as 'Source' on the panel
 3. It should say that there are no bone mappings, yet. Go ahead and click 'Create'.
 4. Now map each relevant source bone to the corresponding target. Make sure to not map any bone multiple times, otherwise you'll get undefined behaviour.
-5. Next you have to set up the rest pose alignment. Click on "Set up", then change the pose of your target armature in a way, that it optimally fits your source armatures rest pose. When done click 'Apply'. ![pose adjusted to fit source's rest pose](https://mwni.io/opensource/blender-retarget/align.png)
+5. Next you have to set up the rest pose alignment. Click on "Set up", then change the pose of your target armature in a way, that it optimally fits your source armatures rest pose. When done click 'Apply'. Caveat: at least one bone needs to be transformed (rotated, scaled or moved) otherwise this step will not complete.[pose adjusted to fit source's rest pose](https://mwni.io/opensource/blender-retarget/align.png)
 6. The add-on will then automatically create drivers for each bone, and you should be good to go.
 
 ## Correction Features
