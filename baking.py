@@ -50,8 +50,8 @@ def transfer_anim(context):
 	s.target.animation_data.action = target_action
 
 	bpy.ops.nla.bake(
-		frame_start=min(keyframes),
-		frame_end=max(keyframes),
+		frame_start=int(min(keyframes)),
+		frame_end=int(max(keyframes)),
 		step=s.bake_step,
 		visual_keying=True,
 		use_current_action=True,
