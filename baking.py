@@ -52,7 +52,7 @@ def transfer_anim(context):
 	bpy.ops.nla.bake(
 		frame_start=int(min(keyframes)),
 		frame_end=int(max(keyframes)),
-		step=s.bake_step,
+		step=int(s.bake_step),
 		visual_keying=True,
 		use_current_action=True,
 		bake_types={'POSE'},
