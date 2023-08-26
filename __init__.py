@@ -19,29 +19,35 @@ from . import alignment
 from . import corrections
 from . import baking
 from . import drivers
+from importlib import reload
 
 
-classes = (
-	*main.classes, 
-	*data.classes,
-	*loadsave.classes,
-	*mapping.classes,
-	*alignment.classes,
-	*corrections.classes,
-	*drivers.classes,
-	*baking.classes,
-)
+modules = [
+	data,
+	main,
+	loadsave,
+	mapping,
+	alignment,
+	corrections,
+	baking,
+	drivers,
+]
 
 
 def register():
-	for cls in classes:
-		bpy.utils.register_class(cls)
+	for i, module in enumerate(modules):
+		modules[i] = reload(module)
 
-	bpy.types.Object.animation_retarget_state = bpy.props.PointerProperty(type=data.State)
+	for module in modules:
+		for cls in module.classes:
+			bpy.utils.register_class(cls)
+
+	bpy.types.Object.animation_retarget_state = bpy.props.PointerProperty(type=modules[0].State)
 
 
 def unregister():
-	for cls in classes:
-		bpy.utils.unregister_class(cls)
+	for module in modules:
+		for cls in module.classes:
+			bpy.utils.unregister_class(cls)
 
 	del bpy.types.Object.animation_retarget_state
