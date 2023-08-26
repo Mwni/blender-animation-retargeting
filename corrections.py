@@ -22,7 +22,6 @@ def draw_panel(layout):
 		draw_limb_section(row.column(), 'Right Hand', 'Right Upper Arm', s, s.get_ik_limb('right-hand'))
 	
 
-
 def draw_limb_section(layout, target_label, origin_label, s, prop):
 	layout.label(text=origin_label)
 	layout.prop_search(prop, 'origin_bone', s.get_target_armature(), 'bones', text='', icon='BONE_DATA')
@@ -39,6 +38,7 @@ class TransferOperator(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+
 class AddIKOperator(bpy.types.Operator):
 	bl_idname = 'retarget_corrections.add_ik'
 	bl_label = 'Add'
@@ -47,6 +47,8 @@ class AddIKOperator(bpy.types.Operator):
 		s = state()
 		limb = s.ik_limbs.add()
 		return {'FINISHED'}
+
+
 
 class RemoveIKOperator(bpy.types.Operator):
 	bl_idname = 'retarget_corrections.remove_ik'
@@ -59,6 +61,7 @@ class RemoveIKOperator(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+
 class ApplyIKOperator(bpy.types.Operator):
 	bl_idname = 'retarget_corrections.apply_ik'
 	bl_label = 'Apply'
@@ -66,6 +69,7 @@ class ApplyIKOperator(bpy.types.Operator):
 	def execute(self, context):
 		state().build_ik()
 		return {'FINISHED'}
+
 
 
 classes = (

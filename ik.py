@@ -1,6 +1,8 @@
+
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Vector
 from .utilfuncs import *
+
 
 def clear():
 	s = state()
@@ -49,7 +51,6 @@ def build():
 	if ctl_collection == None:
 		ctl_collection = bpy.data.collections.new('Retarget Control')
 		bpy.context.scene.collection.children.link(ctl_collection)
-
 
 	clear()
 
@@ -121,7 +122,6 @@ def build():
 			tb = tb.parent
 
 		con.chain_count = tbn + 1
-
 
 		limb.target_empty = te
 		limb.target_empty_child = tec

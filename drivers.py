@@ -1,7 +1,7 @@
 import bpy
-from mathutils import Matrix, Vector, Quaternion, Euler
-from math import pi
+from mathutils import Matrix, Vector, Quaternion
 from .utilfuncs import *
+
 
 def extract_rot_from_mat(mat, axis):
 	return getattr(mat.to_quaternion().to_euler(), axis)
@@ -43,6 +43,7 @@ def bone_mat(name, bone, src):
 		mat = loc_mat(dest_ref_mat.inverted() @ root_delta_mat).inverted() @ applied_delta_mat @ mat
 
 	return mat
+
 
 def bone_rot(axis, name, bone, *src):
 	mat = bone_mat(name, bone, src)
@@ -168,10 +169,10 @@ def build():
 
 			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), s.source, mapping.source, 'LOCAL_SPACE')
 
-			loc_driver.expression = 'rt_bone_loc("%s","%s","%s",%s)' % (axis, s.target.name, mapping.target, ','.join(src_vars))
-			rot_driver.expression = 'rt_bone_rot("%s","%s","%s",%s)' % (axis, s.target.name, mapping.target, ','.join(src_vars))
+			loc_driver.expression = "rt_bone_loc('%s','%s','%s',%s)" % (axis, s.target.name, mapping.target, ','.join(src_vars))
+			rot_driver.expression = "rt_bone_rot('%s','%s','%s',%s)" % (axis, s.target.name, mapping.target, ','.join(src_vars))
 
-
+	print('rebuild drivers')
 
 
 	
@@ -193,8 +194,8 @@ def build():
 			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), s.source, mapping.source, 'WORLD_SPACE')
 			ctl_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT', 'SCALE'), limb.control_cube, '', 'LOCAL_SPACE', offset=len(src_vars))
 
-			loc_driver.expression = 'rt_ikt_loc("%s","%s",%i,%s)' % (axis, s.target.name, i, ','.join(src_vars + ctl_vars))
-			rot_driver.expression = 'rt_ikt_rot("%s","%s",%i,%s)' % (axis, s.target.name, i, ','.join(src_vars + ctl_vars))
+			loc_driver.expression = "rt_ikt_loc('%s','%s',%i,%s)" % (axis, s.target.name, i, ','.join(src_vars + ctl_vars))
+			rot_driver.expression = "rt_ikt_rot('%s','%s',%i,%s)" % (axis, s.target.name, i, ','.join(src_vars + ctl_vars))
 
 
 classes = []

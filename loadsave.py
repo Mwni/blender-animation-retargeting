@@ -3,6 +3,7 @@ import json
 from bpy_extras.io_utils import ExportHelper, ImportHelper
 from .utilfuncs import *
 
+
 def draw_panel(layout):
 	row = layout.row()
 	row.operator('retarget.load', icon='FILEBROWSER')
@@ -24,6 +25,8 @@ class LoadOperator(bpy.types.Operator, ImportHelper):
 		with open(self.filepath, 'r') as f:
 			state().from_serialized(json.load(f))
 		return {'FINISHED'}
+
+
 
 class SaveOperator(bpy.types.Operator, ExportHelper):
 	bl_idname = 'retarget.save'

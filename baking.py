@@ -3,6 +3,7 @@ import os
 from bpy_extras.io_utils import ImportHelper
 from .utilfuncs import *
 
+
 def draw_panel(layout):
 	s = state()
 	row = layout.row()
@@ -11,6 +12,7 @@ def draw_panel(layout):
 	layout.operator('retarget_baking.bake')
 	layout.operator('retarget_baking.batch_import')
 	pass
+
 
 def get_keyframes(obj):
 	frames = []
@@ -24,13 +26,13 @@ def get_keyframes(obj):
 
 	return frames
 
+
 def find_action(name):
 	for action in bpy.data.actions:
 		if action.name == name:
 			return action
 
 	return None
-
 
 
 def transfer_anim(context):
@@ -65,6 +67,7 @@ def transfer_anim(context):
 				kp.interpolation = 'LINEAR'
 
 	target_action.use_fake_user = True
+
 
 
 class BakeOperator(bpy.types.Operator):
@@ -140,6 +143,8 @@ class BatchImportOperator(bpy.types.Operator, ImportHelper):
 		bpy.context.window_manager.progress_end()
 
 		return {'FINISHED'}
+
+
 
 classes = (
 	BakeOperator,

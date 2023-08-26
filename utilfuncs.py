@@ -1,11 +1,14 @@
 import bpy
-from mathutils import Matrix, Vector
+from mathutils import Matrix
+
 
 def state():
 	return bpy.context.object.animation_retarget_state
 
+
 def data_to_matrix4x4(values):
 	return Matrix((values[0:4], values[4:8], values[8:12], values[12:16]))
+
 
 def matrix4x4_to_data(matrix):
 	values = []
@@ -20,8 +23,10 @@ def matrix4x4_to_data(matrix):
 def rot_mat(mat):
 	return mat.to_quaternion().to_matrix().to_4x4()
 
+
 def loc_mat(mat):
 	return Matrix.Translation(mat.to_translation()).to_4x4()
+
 
 def alert_error(title, message):
 	def draw(self, context):

@@ -1,6 +1,7 @@
 import bpy
 from .utilfuncs import *
 
+
 def draw_panel(layout):
 	s = state()
 	n = len(s.mappings)
@@ -45,6 +46,7 @@ class RT_UL_mappings(bpy.types.UIList):
 		return flt_flags, flt_neworder
 
 
+
 class LoadOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.load'
 	bl_label = 'Load'
@@ -52,6 +54,8 @@ class LoadOperator(bpy.types.Operator):
 	def execute(self, context):
 		state().editing_mappings = True
 		return {'FINISHED'}
+
+
 
 class SaveOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.save'
@@ -71,6 +75,8 @@ class EditOperator(bpy.types.Operator):
 		state().editing_mappings = True
 		return {'FINISHED'}
 
+
+
 class ApplyOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.apply'
 	bl_label = 'Apply'
@@ -84,6 +90,8 @@ class ApplyOperator(bpy.types.Operator):
 
 		state().editing_mappings = False
 		return {'FINISHED'}
+
+
 
 class ListActionOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.list_action'
@@ -104,6 +112,8 @@ class ListActionOperator(bpy.types.Operator):
 
 		return {'FINISHED'}
 
+
+
 class ClearOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.clear'
 	bl_label = 'Reset Bone Mappings'
@@ -117,6 +127,19 @@ class ClearOperator(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+
+class UseInvalidSourceOperator(bpy.types.Operator):
+	bl_idname = 'retarget.use_invalid_source'
+	bl_label = 'Use anyway'
+
+	def execute(self, context):
+		s = state()
+		s.editing_mappings = True
+		s.selected_source = s.invalid_selected_source
+		return {'FINISHED'}
+
+
+
 classes = (
 	RT_UL_mappings,
 	ApplyOperator,
@@ -124,5 +147,6 @@ classes = (
 	ClearOperator,
 	LoadOperator,
 	SaveOperator,
-	ListActionOperator
+	ListActionOperator,
+	UseInvalidSourceOperator
 )

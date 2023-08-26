@@ -1,6 +1,6 @@
 import bpy
-from mathutils import Matrix
 from .utilfuncs import *
+
 
 def draw_panel(layout):
 	s = state()
@@ -24,6 +24,7 @@ def draw_panel(layout):
 		row.operator('retarget_alignment.cancel', text='Cancel', icon='X')
 		row.operator('retarget_alignment.apply', text='Apply', icon='CHECKMARK')
 
+
 def enter_offset():
 	s = state()
 	s.unleash()
@@ -39,6 +40,7 @@ def enter_offset():
 			if m.target == bone.name:
 				bone.matrix_basis = data_to_matrix4x4(m.offset)
 
+
 def restore_poses():
 	s = state()
 
@@ -51,6 +53,7 @@ def restore_poses():
 
 def store_matrices():
 	s = state()
+
 	for bone in s.target.pose.bones:
 		for m in s.mappings:
 			if m.target == bone.name:
@@ -80,38 +83,10 @@ def handle_edit_change(self, context):
 		leave_edit()
 
 
-class Panel(bpy.types.Panel):
-	bl_idname = 'RT_PT_Alignment'
-	bl_label = 'Alignment'
-	bl_parent_id = 'RT_PT_Main'
-	bl_category = 'Retarget'
-	bl_space_type = 'VIEW_3D'
-	bl_region_type = 'UI'
-
-	def draw(self, context):
-		if uist().edit_alignment:
-			box = self.layout.box()
-			box.label(text='Align the target\'s (%s) rest pose with source.' % cfg().source.name, icon='INFO')
-			row = self.layout.row()
-			row.operator('retarget_alignment.cancel', text='Cancel')
-			row.operator('retarget_alignment.apply', text='Apply')
-		else:
-			n = cfg().get_alignments_count()
-			if n == 0:
-				self.layout.operator('retarget_alignment.edit', text='Set Up')
-			else:
-				row = self.layout.row()
-				row.label(text='%i bone(s) with offset' % n, icon='BONE_DATA')
-				row.operator('retarget_alignment.edit', text='Edit Alignment')
-
-
-		pass
-
 
 class EditOperator(bpy.types.Operator):
 	bl_idname = 'retarget_alignment.edit'
 	bl_label = 'Change Alignment'
-
 
 	def execute(self, context):
 		s = state()
@@ -126,6 +101,7 @@ class EditOperator(bpy.types.Operator):
 		return {'FINISHED'}
 
 
+
 class ApplyOperator(bpy.types.Operator):
 	bl_idname = 'retarget_alignment.apply'
 	bl_label = 'Apply Alignment'
@@ -137,6 +113,8 @@ class ApplyOperator(bpy.types.Operator):
 
 		return {'FINISHED'}
 
+
+
 class CancelOperator(bpy.types.Operator):
 	bl_idname = 'retarget_alignment.cancel'
 	bl_label = 'Cancel Alignment Change'
@@ -146,6 +124,7 @@ class CancelOperator(bpy.types.Operator):
 		leave_edit()
 
 		return {'FINISHED'}
+
 
 
 class ResetOperator(bpy.types.Operator):
@@ -165,6 +144,7 @@ class ResetOperator(bpy.types.Operator):
 		s.update_drivers()
 
 		return {'FINISHED'}
+
 
 
 classes = (
