@@ -87,6 +87,7 @@ def handle_edit_change(self, context):
 class EditOperator(bpy.types.Operator):
 	bl_idname = 'retarget_alignment.edit'
 	bl_label = 'Change Alignment'
+	bl_description = 'Set the source to target armature rest pose alignment'
 
 	def execute(self, context):
 		s = state()
@@ -105,6 +106,7 @@ class EditOperator(bpy.types.Operator):
 class ApplyOperator(bpy.types.Operator):
 	bl_idname = 'retarget_alignment.apply'
 	bl_label = 'Apply Alignment'
+	bl_description = 'Use the current pose as reference rest pose when retargeting'
 
 	def execute(self, context):
 		store_matrices()
@@ -118,6 +120,7 @@ class ApplyOperator(bpy.types.Operator):
 class CancelOperator(bpy.types.Operator):
 	bl_idname = 'retarget_alignment.cancel'
 	bl_label = 'Cancel Alignment Change'
+	bl_description = 'Discard the current pose and reset to pose before editing'
 
 	def execute(self, context):
 		restore_poses()
@@ -130,6 +133,7 @@ class CancelOperator(bpy.types.Operator):
 class ResetOperator(bpy.types.Operator):
 	bl_idname = 'retarget_alignment.reset'
 	bl_label = 'Reset Rest Pose Alignment'
+	bl_description = 'Discard configured rest pose and start from scratch.'
 	bl_options = {'REGISTER', 'INTERNAL'}
 
 	def invoke(self, context, event):

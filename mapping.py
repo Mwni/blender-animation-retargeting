@@ -50,6 +50,7 @@ class RT_UL_mappings(bpy.types.UIList):
 class EditOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.edit'
 	bl_label = 'Create'
+	bl_description = 'Map individual bones from the source armature to the target armature'
 
 	def execute(self, context):
 		state().editing_mappings = True
@@ -60,6 +61,7 @@ class EditOperator(bpy.types.Operator):
 class ApplyOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.apply'
 	bl_label = 'Apply'
+	bl_description = 'Save and use the created bone mappings'
 
 	def execute(self, context):
 		s = state()
@@ -75,7 +77,7 @@ class ApplyOperator(bpy.types.Operator):
 
 class ListActionOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.list_action'
-	bl_label = 'Apply'
+	bl_label = ''
 	action: bpy.props.StringProperty()
 
 	def execute(self, context):
@@ -97,6 +99,7 @@ class ListActionOperator(bpy.types.Operator):
 class ClearOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.clear'
 	bl_label = 'Reset Bone Mappings'
+	bl_description = 'Clears all existing source-target bone mappings'
 	bl_options = {'REGISTER', 'INTERNAL'}
 
 	def invoke(self, context, event):
@@ -125,8 +128,6 @@ classes = (
 	ApplyOperator,
 	EditOperator,
 	ClearOperator,
-	LoadOperator,
-	SaveOperator,
 	ListActionOperator,
 	UseInvalidSourceOperator
 )
