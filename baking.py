@@ -1,6 +1,7 @@
 import os
 import bpy
 from bpy_extras.io_utils import ImportHelper
+from .drivers import update_drivers
 
 
 def draw_panel(ctx, layout):
@@ -71,7 +72,19 @@ class BakingBakeOperator(bpy.types.Operator):
 	bl_description = 'Inserts animation keyframes transferred from the source based on the configured retargeting'
 
 	def execute(self, context):
-		transfer_anim(context.object.retargeting_context)
+		ctx = context.object.retargeting_context
+		transfer_anim(ctx)
+
+		ctx.setting_disable_drivers = True
+		update_drivers(ctx)
+		
+		context.window_manager.popup_menu(
+			title='Bake Complete',
+			icon='INFO',
+			draw_func=lambda self, ctx: (
+				self.layout.label(text='The retargeted animation has been successfully baked into the target armature. Drivers have been disabled so you can review the result animation')
+			)
+		)
 		return {'FINISHED'}
 
 
