@@ -5,6 +5,162 @@ from .util import rot_mat, loc_mat, list_to_matrix, extract_loc_axis_from_mat, e
 from .log import info
 
 
+def draw_panel(ctx, layout):
+	if ctx.setting_disable_drivers:
+		split = layout.split(factor=0.63)
+		split.label(text='Bone Drivers disabled', icon='ERROR')
+		split.operator(DriversEnableOperator.bl_idname, text='Enable')
+	else:
+		split = layout.split(factor=0.38)
+		status = split.column()
+		actions = split.row()
+
+		status.label(text='%i Bone Drivers' % len(ctx.mappings), icon='DRIVER')
+		actions.operator(DriversRebuildOperator.bl_idname, text='Rebuild', icon='FILE_REFRESH')
+		actions.operator(DriversDisableOperator.bl_idname, text='Disable', icon='X')
+
+		ik_drivers_n = sum([1 if limb.enabled else 0 for limb in ctx.ik_limbs])
+
+		if ik_drivers_n > 0:
+			status.label(text='%i IK Drivers' % ik_drivers_n, icon='CON_KINEMATIC')
+			actions.scale_y = 2
+
+
+
+def update_drivers(ctx):
+	if ctx.is_importing:
+		return
+
+	if not ctx.setting_disable_drivers and ctx.get_bone_alignments_count() > 0:
+		update_ik_controls(ctx)
+		clear_drivers(ctx)
+		build_drivers(ctx)
+	else:
+		clear_ik_controls(ctx)
+		clear_drivers(ctx)
+
+
+def clear_drivers(ctx):
+	for mapping in ctx.mappings:
+		_, dest_pose = ctx.get_data_and_pose_bone('target', mapping.target)
+		dest_pose.driver_remove('location')
+		dest_pose.driver_remove('rotation_euler')
+		dest_pose.matrix_basis = Matrix()
+
+	for limb in ctx.ik_limbs:
+		if limb.target_empty != None:
+			limb.target_empty.driver_remove('location')
+			limb.target_empty.driver_remove('rotation_euler')
+
+	info('cleared drivers')
+
+
+def create_vars(loc_driver, rot_driver, t, s_source, mapping_source, space, offset=0):
+	src_vars = []
+
+	for tt in t:
+		for ta in (('W', 'X', 'Y', 'Z') if tt == 'ROT' else ('X', 'Y', 'Z')):
+			for driver in (loc_driver, rot_driver):
+				var = driver.variables.new()
+				var.name = chr(65 + len(src_vars) + offset)
+				var.type = 'TRANSFORMS'
+				var.targets[0].id = s_source
+				var.targets[0].bone_target = mapping_source
+				var.targets[0].rotation_mode = 'QUATERNION'
+				var.targets[0].transform_space = space
+				var.targets[0].transform_type = tt + '_' + ta
+
+			src_vars.append(var.name)
+
+	return src_vars
+
+
+def build_drivers(ctx):
+	bpy.app.driver_namespace['retarget_bone_rot'] = drive_bone_rot
+	bpy.app.driver_namespace['retarget_bone_loc'] = drive_bone_loc
+	bpy.app.driver_namespace['retarget_ik_rot'] = drive_ik_target_rot
+	bpy.app.driver_namespace['retarget_ik_loc'] = drive_ik_target_loc
+
+	for mapping in ctx.mappings:
+		_, dest_pose = ctx.get_data_and_pose_bone('target', mapping.target)
+
+		dest_pose.rotation_mode = 'XYZ'
+
+		loc_drivers = dest_pose.driver_add('location')
+		rot_drivers = dest_pose.driver_add('rotation_euler')
+
+
+		for axis, lfc, rfc in zip(('x','y','z'), loc_drivers, rot_drivers):
+			loc_driver = lfc.driver
+			rot_driver = rfc.driver
+
+			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), ctx.source, mapping.source, 'LOCAL_SPACE')
+
+			loc_driver.expression = "retarget_bone_loc('%s','%s','%s',%s)" % (axis, ctx.target.name, mapping.target, ','.join(src_vars))
+			rot_driver.expression = "retarget_bone_rot('%s','%s','%s',%s)" % (axis, ctx.target.name, mapping.target, ','.join(src_vars))
+
+	
+	for i, limb in enumerate(ctx.ik_limbs):
+		if not limb.enabled:
+			continue
+
+		mapping = ctx.get_mapping_for_target(limb.target_bone)
+
+		loc_drivers = limb.target_empty.driver_add('location')
+		rot_drivers = limb.target_empty.driver_add('rotation_euler')
+
+		for axis, lfc, rfc in zip(('x','y','z'), loc_drivers, rot_drivers):
+			loc_driver = lfc.driver
+			rot_driver = rfc.driver
+
+			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), ctx.source, mapping.source, 'WORLD_SPACE')
+			ctl_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT', 'SCALE'), limb.control_cube, '', 'LOCAL_SPACE', offset=len(src_vars))
+
+			loc_driver.expression = "retarget_ik_loc('%s','%s',%i,%s)" % (axis, ctx.target.name, i, ','.join(src_vars + ctl_vars))
+			rot_driver.expression = "retarget_ik_rot('%s','%s',%i,%s)" % (axis, ctx.target.name, i, ','.join(src_vars + ctl_vars))
+
+	info('built drivers')
+
+
+
+class DriversEnableOperator(bpy.types.Operator):
+	bl_idname = 'drivers.enable'
+	bl_label = 'Enable Drivers'
+	bl_description = 'Build and apply all bone drivers according to the current setup'
+
+	def execute(self, context):
+		ctx = context.object.retargeting_context
+		ctx.setting_disable_drivers = False
+		update_drivers(ctx)
+		return {'FINISHED'}
+
+
+class DriversRebuildOperator(bpy.types.Operator):
+	bl_idname = 'drivers.rebuild'
+	bl_label = 'Rebuild Drivers'
+	bl_description = 'Rebuild and apply all bone drivers. This is useful when there was a change that the addon missed'
+
+	def execute(self, context):
+		update_drivers(context.object.retargeting_context)
+		return {'FINISHED'}
+	
+
+class DriversDisableOperator(bpy.types.Operator):
+	bl_idname = 'drivers.disable'
+	bl_label = 'Disable Drivers'
+	bl_description = 'Clear all existing bone drivers and IK controls'
+
+	def execute(self, context):
+		ctx = context.object.retargeting_context
+		ctx.setting_disable_drivers = True
+		update_drivers(ctx)
+		return {'FINISHED'}
+
+
+
+### DRIVER EXPRESSIONS 
+
+
 def drive_bone_mat(name, bone, src):
 	mat = Matrix.Translation(Vector(src[0:3]))
 	quat = Quaternion(src[3:])
@@ -83,98 +239,8 @@ def drive_ik_target_loc(axis, name, index, *src):
 
 
 
-def update_drivers(ctx):
-	if ctx.is_importing:
-		return
-
-	if not ctx.setting_disable_drivers and ctx.get_bone_alignments_count() > 0:
-		update_ik_controls(ctx)
-		clear_drivers(ctx)
-		build_drivers(ctx)
-	else:
-		clear_ik_controls(ctx)
-		clear_drivers(ctx)
-
-
-def clear_drivers(ctx):
-	for mapping in ctx.mappings:
-		_, dest_pose = ctx.get_data_and_pose_bone('target', mapping.target)
-		dest_pose.driver_remove('location')
-		dest_pose.driver_remove('rotation_euler')
-
-	for limb in ctx.ik_limbs:
-		if limb.target_empty != None:
-			limb.target_empty.driver_remove('location')
-			limb.target_empty.driver_remove('rotation_euler')
-
-	info('cleared drivers')
-
-
-def create_vars(loc_driver, rot_driver, t, s_source, mapping_source, space, offset=0):
-	src_vars = []
-
-	for tt in t:
-		for ta in (('W', 'X', 'Y', 'Z') if tt == 'ROT' else ('X', 'Y', 'Z')):
-			for driver in (loc_driver, rot_driver):
-				var = driver.variables.new()
-				var.name = chr(65 + len(src_vars) + offset)
-				var.type = 'TRANSFORMS'
-				var.targets[0].id = s_source
-				var.targets[0].bone_target = mapping_source
-				var.targets[0].rotation_mode = 'QUATERNION'
-				var.targets[0].transform_space = space
-				var.targets[0].transform_type = tt + '_' + ta
-
-			src_vars.append(var.name)
-
-	return src_vars
-
-
-def build_drivers(ctx):
-	bpy.app.driver_namespace['retarget_bone_rot'] = drive_bone_rot
-	bpy.app.driver_namespace['retarget_bone_loc'] = drive_bone_loc
-	bpy.app.driver_namespace['retarget_ik_rot'] = drive_ik_target_rot
-	bpy.app.driver_namespace['retarget_ik_loc'] = drive_ik_target_loc
-
-	for mapping in ctx.mappings:
-		_, dest_pose = ctx.get_data_and_pose_bone('target', mapping.target)
-
-		dest_pose.rotation_mode = 'XYZ'
-
-		loc_drivers = dest_pose.driver_add('location')
-		rot_drivers = dest_pose.driver_add('rotation_euler')
-
-
-		for axis, lfc, rfc in zip(('x','y','z'), loc_drivers, rot_drivers):
-			loc_driver = lfc.driver
-			rot_driver = rfc.driver
-
-			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), ctx.source, mapping.source, 'LOCAL_SPACE')
-
-			loc_driver.expression = "retarget_bone_loc('%s','%s','%s',%s)" % (axis, ctx.target.name, mapping.target, ','.join(src_vars))
-			rot_driver.expression = "retarget_bone_rot('%s','%s','%s',%s)" % (axis, ctx.target.name, mapping.target, ','.join(src_vars))
-
-	
-	for i, limb in enumerate(ctx.ik_limbs):
-		if not limb.enabled:
-			continue
-
-		mapping = ctx.get_mapping_for_target(limb.target_bone)
-
-		loc_drivers = limb.target_empty.driver_add('location')
-		rot_drivers = limb.target_empty.driver_add('rotation_euler')
-
-		for axis, lfc, rfc in zip(('x','y','z'), loc_drivers, rot_drivers):
-			loc_driver = lfc.driver
-			rot_driver = rfc.driver
-
-			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), ctx.source, mapping.source, 'WORLD_SPACE')
-			ctl_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT', 'SCALE'), limb.control_cube, '', 'LOCAL_SPACE', offset=len(src_vars))
-
-			loc_driver.expression = "retarget_ik_loc('%s','%s',%i,%s)" % (axis, ctx.target.name, i, ','.join(src_vars + ctl_vars))
-			rot_driver.expression = "retarget_ik_rot('%s','%s',%i,%s)" % (axis, ctx.target.name, i, ','.join(src_vars + ctl_vars))
-
-	info('built drivers')
-
-
-classes = []
+classes = (
+	DriversEnableOperator,
+	DriversRebuildOperator,
+	DriversDisableOperator
+)

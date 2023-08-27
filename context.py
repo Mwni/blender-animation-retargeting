@@ -59,7 +59,7 @@ class Context(bpy.types.PropertyGroup):
 
 	setting_correct_feet: bpy.props.BoolProperty(default=False, update=lambda self, ctx: self.handle_ik_change())
 	setting_correct_hands: bpy.props.BoolProperty(default=False, update=lambda self, ctx: self.handle_ik_change())
-	setting_disable_drivers: bpy.props.BoolProperty(update=lambda self, ctx: update_drivers(ctx.object.retargeting_context))
+	setting_disable_drivers: bpy.props.BoolProperty(default=False)
 	setting_bake_step: bpy.props.FloatProperty(default=1.0)
 	setting_bake_linear: bpy.props.BoolProperty(default=False)
 

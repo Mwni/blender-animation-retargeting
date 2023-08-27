@@ -3,6 +3,7 @@ from . import savefile
 from . import mapping
 from . import alignment
 from . import corrections
+from . import drivers
 from . import baking
 
 
@@ -45,13 +46,12 @@ class MainPanel(bpy.types.Panel):
 						corrections.draw_panel(ctx, layout.box())
 
 						layout.separator()
-						layout.label(text='Baking')
-						baking.draw_panel(ctx, layout.box())
+						layout.label(text='Drivers')
+						drivers.draw_panel(ctx, layout.box())
 
 						layout.separator()
-						layout.label(text='Options')
-						box = layout.box()
-						box.prop(ctx, 'setting_disable_drivers', text='Disable Drivers')
+						layout.label(text='Baking')
+						baking.draw_panel(ctx, layout.box())
 						
 		else:
 			layout.label(text='Select target armature', icon='ERROR')
