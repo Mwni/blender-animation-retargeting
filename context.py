@@ -47,7 +47,7 @@ class Context(bpy.types.PropertyGroup):
 	selected_source: bpy.props.PointerProperty(
 		type=bpy.types.Object,
 		poll=lambda self, obj: obj.type == 'ARMATURE' and obj != bpy.context.object,
-		update=lambda self, ctx: self.handle_source_update()
+		update=lambda self, ctx: self.handle_source_change()
 	)
 	source: bpy.props.PointerProperty(type=bpy.types.Object)
 	target: bpy.props.PointerProperty(type=bpy.types.Object)
@@ -57,8 +57,8 @@ class Context(bpy.types.PropertyGroup):
 	ik_limbs: bpy.props.CollectionProperty(type=IKLimb)
 	is_importing: bpy.props.BoolProperty(default=False)
 
-	setting_correct_feet: bpy.props.BoolProperty(default=False, update=lambda self, ctx: update_ik_limbs(ctx.object.retargeting_context))
-	setting_correct_hands: bpy.props.BoolProperty(default=False, update=lambda self, ctx: update_ik_limbs(ctx.object.retargeting_context))
+	setting_correct_feet: bpy.props.BoolProperty(default=False, update=lambda self, ctx: self.handle_ik_change())
+	setting_correct_hands: bpy.props.BoolProperty(default=False, update=lambda self, ctx: self.handle_ik_change())
 	setting_disable_drivers: bpy.props.BoolProperty(update=lambda self, ctx: update_drivers(ctx.object.retargeting_context))
 	setting_bake_step: bpy.props.FloatProperty(default=1.0)
 	setting_bake_linear: bpy.props.BoolProperty(default=False)
@@ -67,7 +67,7 @@ class Context(bpy.types.PropertyGroup):
 	ui_editing_alignment: bpy.props.BoolProperty(default=False)
 
 
-	def handle_source_update(self, ignore_incompat=False):
+	def handle_source_change(self, ignore_incompat=False):
 		if self.selected_source == None:
 			return
 
@@ -82,6 +82,11 @@ class Context(bpy.types.PropertyGroup):
 		self.source = self.selected_source
 		self.target = bpy.context.object
 		update_drivers(self)
+
+
+	def handle_ik_change(self):
+		if update_ik_limbs(self):
+			update_drivers(self)
 
 
 	def get_source_armature(self):

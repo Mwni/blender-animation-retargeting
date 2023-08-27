@@ -1,7 +1,6 @@
 
 import bpy
 from mathutils import Vector
-from .drivers import update_drivers
 from .util import loc_mat, list_to_matrix, matrix_to_list
 from .log import info
 
@@ -30,8 +29,7 @@ def update_ik_limbs(ctx):
 		if was_enabled != limb.enabled:
 			needs_rebuild = True
 
-	if needs_rebuild:
-		update_drivers(ctx)
+	return needs_rebuild
 
 
 def create_ik_limb(ctx, name):
