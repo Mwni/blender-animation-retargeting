@@ -43,7 +43,7 @@ def warn_incompatible_source_armature(incompat_n):
 	bpy.context.window_manager.popup_menu(
 		title='Incompatible armature', 
 		icon='ERROR',
-		draw=lambda self, _: (
+		draw_func=lambda self, _: (
 			self.layout.label(text='Corresponding bones for %i mapping(s) not found.' % incompat_n) +
 			self.layout.operator('retarget.use_invalid_source_anyway')
 		)
@@ -93,7 +93,7 @@ class MappingsApplyOperator(bpy.types.Operator):
 			bpy.context.window_manager.popup_menu(
 				title='Invalid Mappings', 
 				icon='ERROR',
-				draw=lambda self, context: self.layout.label(
+				draw_func=lambda self, context: self.layout.label(
 					text='There are one or more invalid mappings (marked red).'
 				)
 			)
