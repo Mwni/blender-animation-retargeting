@@ -63,7 +63,7 @@ def build():
 		if not limb.enabled:
 			continue
 
-		target_arma_bone, target_bone = s.get_pose_and_arma_bone('target', limb.target_bone)
+		target_data_bone, target_bone = s.get_data_and_pose_bone('target', limb.target_bone)
 		mapping = s.get_mapping_for_target(limb.target_bone)
 
 		te = bpy.data.objects.new(limb.target_bone + '-target', None)
@@ -77,12 +77,12 @@ def build():
 		te.parent = s.target
 		tec.parent = te
 
-		head = Vector(target_arma_bone.head_local)
-		tail = Vector(target_arma_bone.tail_local)
+		head = Vector(target_data_bone.head_local)
+		tail = Vector(target_data_bone.tail_local)
 		offset = head - tail
 
 		tec.location.x = 0
-		tec.location.y = target_arma_bone.length
+		tec.location.y = target_data_bone.length
 		tec.location.z = 0
 
 		#pe = bpy.data.objects.new(limb.target_bone + '-pole', None)
@@ -95,7 +95,7 @@ def build():
 		ch.empty_display_size = 0
 		ctl_collection.objects.link(ch)
 		ch.parent = s.target
-		ch.matrix_local = loc_mat(target_arma_bone.matrix_local)
+		ch.matrix_local = loc_mat(target_data_bone.matrix_local)
 
 		cc = bpy.data.objects.new(limb.target_bone + '-transform', None)
 		cc.empty_display_size = h * 0.1
@@ -103,7 +103,7 @@ def build():
 		ctl_collection.objects.link(cc)
 		cc.parent = ch
 		cc.matrix_local = data_to_matrix4x4(limb.control_transform)
-		#ce.location.x, ce.location.y, ce.location.z = target_arma_bone.matrix_local.translation
+		#ce.location.x, ce.location.y, ce.location.z = target_data_bone.matrix_local.translation
 
 		con = target_bone.constraints.new('IK')
 		con.name = 'Retarget IK'

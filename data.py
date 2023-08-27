@@ -162,7 +162,7 @@ class State(bpy.types.PropertyGroup):
 	def get_pose_bone(self, t, name):
 		return self.get_bone_from(getattr(self, t).pose.bones, name)
 
-	def get_pose_and_arma_bone(self, t, name):
+	def get_data_and_pose_bone(self, t, name):
 		return (self.get_bone_from(getattr(self, t).data.bones, name)
 				,self.get_bone_from(getattr(self, t).pose.bones, name))
 

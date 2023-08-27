@@ -21,19 +21,19 @@ def bone_mat(name, bone, src):
 	mapping = s.get_mapping_for_target(bone)
 	rest_mat = data_to_matrix4x4(mapping.rest)
 	offset_mat = data_to_matrix4x4(mapping.offset)
-	src_arma, src_pose = s.get_pose_and_arma_bone('source', mapping.source)
-	dest_arma, dest_pose = s.get_pose_and_arma_bone('target', mapping.target)
-	src_ref_mat = rot_mat(s.source.matrix_world) @ rot_mat(src_arma.matrix_local)
+	src_data, src_pose = s.get_data_and_pose_bone('source', mapping.source)
+	dest_data, dest_pose = s.get_data_and_pose_bone('target', mapping.target)
+	src_ref_mat = rot_mat(s.source.matrix_world) @ rot_mat(src_data.matrix_local)
 	dest_ref_mat = rot_mat(s.target.matrix_world) @ rot_mat(rest_mat)
-	diff_mat = src_ref_mat. inverted() @ dest_ref_mat
+	diff_mat = src_ref_mat.inverted() @ dest_ref_mat
 	scale = s.source.scale[0]
 
 	mat.translation *= scale
 	mat = diff_mat.inverted() @ mat @ diff_mat
 	mat = offset_mat @ mat
 
-	if s.correct_root_pivot and s.root_bone != '' and dest_arma.name == s.root_bone:
-		src_root_mat = s.source.matrix_world @ src_arma.matrix_local
+	if s.correct_root_pivot and s.root_bone != '' and dest_data.name == s.root_bone:
+		src_root_mat = s.source.matrix_world @ src_data.matrix_local
 		dest_root_mat = s.target.matrix_world @ rest_mat
 		src_root_loc = src_root_mat.to_translation()
 		dest_root_loc = dest_root_mat.to_translation()
@@ -74,12 +74,12 @@ def ik_target_mat(name, index, src):
 	s = obj.animation_retarget_state
 	limb = s.ik_limbs[index]
 	mapping = s.get_mapping_for_target(limb.target_bone)
-	src_arma, src_pose = s.get_pose_and_arma_bone('source', mapping.source)
-	dest_arma, dest_pose = s.get_pose_and_arma_bone('target', mapping.target)
+	src_data, src_pose = s.get_data_and_pose_bone('source', mapping.source)
+	dest_data, dest_pose = s.get_data_and_pose_bone('target', mapping.target)
 
 	src_world_mat = loc_mat(s.source.matrix_world).inverted() @ s.source.matrix_world
-	src_ref_mat = s.source.matrix_world @ loc_mat(src_arma.matrix_local)
-	src_rot_mat = rot_mat(s.source.matrix_world) @ rot_mat(src_arma.matrix_local)
+	src_ref_mat = s.source.matrix_world @ loc_mat(src_data.matrix_local)
+	src_rot_mat = rot_mat(s.source.matrix_world) @ rot_mat(src_data.matrix_local)
 	dest_rest_mat = data_to_matrix4x4(mapping.rest)
 	dest_rot_mat = rot_mat(s.target.matrix_world) @ rot_mat(dest_rest_mat)
 	diff_rot_mat = src_rot_mat.inverted() @ dest_rot_mat
@@ -114,7 +114,7 @@ def clear():
 	s = state()
 
 	for mapping in s.mappings:
-		dest_arma, dest_pose = s.get_pose_and_arma_bone('target', mapping.target)
+		dest_data, dest_pose = s.get_data_and_pose_bone('target', mapping.target)
 		dest_pose.driver_remove('location')
 		dest_pose.driver_remove('rotation_euler')
 
@@ -157,8 +157,8 @@ def build():
 	clear()
 
 	for mapping in s.mappings:
-		src_arma, src_pose = s.get_pose_and_arma_bone('source', mapping.source)
-		dest_arma, dest_pose = s.get_pose_and_arma_bone('target', mapping.target)
+		src_data, src_pose = s.get_data_and_pose_bone('source', mapping.source)
+		dest_data, dest_pose = s.get_data_and_pose_bone('target', mapping.target)
 
 		dest_pose.rotation_mode = 'XYZ'
 
