@@ -1,15 +1,55 @@
 
 import bpy
 from mathutils import Vector
-from .utilfuncs import *
+from .drivers import update_drivers
+from .util import loc_mat, list_to_matrix, matrix_to_list
 from .log import info
 
 
-def clear():
-	s = state()
+def update_ik_limbs(ctx):
+	if ctx.is_importing:
+		return
 
-	for limb in s.ik_limbs:
-		target_bone = s.get_pose_bone('target', limb.target_bone)
+	needs_rebuild = False
+
+	for active, name in ((ctx.setting_correct_feet, 'left-foot'), (ctx.setting_correct_feet, 'right-foot'), 
+						(ctx.setting_correct_hands, 'left-hand'), (ctx.setting_correct_hands, 'right-hand')):
+		limb = ctx.get_ik_limb_by_name(name)
+
+		if limb == None:
+			limb = create_ik_limb(ctx, name)
+
+		was_enabled = limb.enabled
+
+		limb.enabled = (
+			active
+			and limb.target_bone != None and limb.target_bone != ''
+			and limb.origin_bone != None and limb.origin_bone != ''
+		)
+
+		if was_enabled != limb.enabled:
+			needs_rebuild = True
+
+	if needs_rebuild:
+		update_drivers(ctx)
+
+
+def create_ik_limb(ctx, name):
+	limb = ctx.ik_limbs.add()
+	limb.name = name
+	limb.enabled = False
+
+	return limb
+
+
+def update_ik_controls(ctx):
+	clear_ik_controls(ctx)
+	build_ik_controls(ctx)
+
+
+def clear_ik_controls(ctx):
+	for limb in ctx.ik_limbs:
+		target_bone = ctx.get_pose_bone('target', limb.target_bone)
 
 		if target_bone:
 			for con in target_bone.constraints:
@@ -30,7 +70,7 @@ def clear():
 		#	limb.pole_empty = None
 
 		if limb.control_cube != None:
-			limb.control_transform = matrix4x4_to_data(limb.control_cube.matrix_local)
+			limb.control_transform = matrix_to_list(limb.control_cube.matrix_local)
 			bpy.data.objects.remove(limb.control_cube, do_unlink=True)
 			limb.control_cube = None
 
@@ -38,11 +78,10 @@ def clear():
 			bpy.data.objects.remove(limb.control_holder, do_unlink=True)
 			limb.control_holder = None
 
-	info('cleared IKs')
+	info('cleared IK controls')
 
 
-def build():
-	s = state()
+def build_ik_controls(ctx):
 	aux_collection = next((c for c in bpy.data.collections if c.name == 'Retarget Auxiliary'), None)
 	ctl_collection = next((c for c in bpy.data.collections if c.name == 'Retarget Control'), None)
 
@@ -55,16 +94,14 @@ def build():
 		ctl_collection = bpy.data.collections.new('Retarget Control')
 		bpy.context.scene.collection.children.link(ctl_collection)
 
-	clear()
+	h = ctx.target.dimensions.z
 
-	h = s.target.dimensions.z
-
-	for limb in s.ik_limbs:
+	for limb in ctx.ik_limbs:
 		if not limb.enabled:
 			continue
 
-		target_data_bone, target_bone = s.get_data_and_pose_bone('target', limb.target_bone)
-		mapping = s.get_mapping_for_target(limb.target_bone)
+		target_data_bone, target_bone = ctx.get_data_and_pose_bone('target', limb.target_bone)
+		mapping = ctx.get_mapping_for_target(limb.target_bone)
 
 		te = bpy.data.objects.new(limb.target_bone + '-target', None)
 		tec = bpy.data.objects.new(limb.target_bone + '-target-child', None)
@@ -74,7 +111,7 @@ def build():
 		tec.empty_display_type = 'PLAIN_AXES'
 		aux_collection.objects.link(te)
 		aux_collection.objects.link(tec)
-		te.parent = s.target
+		te.parent = ctx.target
 		tec.parent = te
 
 		head = Vector(target_data_bone.head_local)
@@ -94,7 +131,7 @@ def build():
 		ch = bpy.data.objects.new(limb.target_bone + '-transform-holder', None)
 		ch.empty_display_size = 0
 		ctl_collection.objects.link(ch)
-		ch.parent = s.target
+		ch.parent = ctx.target
 		ch.matrix_local = loc_mat(target_data_bone.matrix_local)
 
 		cc = bpy.data.objects.new(limb.target_bone + '-transform', None)
@@ -102,7 +139,7 @@ def build():
 		cc.empty_display_type = 'CUBE'
 		ctl_collection.objects.link(cc)
 		cc.parent = ch
-		cc.matrix_local = data_to_matrix4x4(limb.control_transform)
+		cc.matrix_local = list_to_matrix(limb.control_transform)
 		#ce.location.x, ce.location.y, ce.location.z = target_data_bone.matrix_local.translation
 
 		con = target_bone.constraints.new('IK')
@@ -132,7 +169,7 @@ def build():
 		limb.control_holder = ch
 		limb.control_cube = cc
 
-	info('rebuilt IKs')
+	info('built IK controls')
 
 
 

@@ -4,7 +4,6 @@ from . import mapping
 from . import alignment
 from . import corrections
 from . import baking
-from .utilfuncs import *
 
 
 class MainPanel(bpy.types.Panel):
@@ -18,42 +17,45 @@ class MainPanel(bpy.types.Panel):
 		layout = self.layout
 
 		if context.object != None and context.object.type == 'ARMATURE':
-			s = state()
+			ctx = context.object.retargeting_context
+
 			split = layout.row().split(factor=0.244)
 			split.column().label(text='Target:')
 			split.column().label(text=context.object.name, icon='ARMATURE_DATA')
-			layout.prop(s, 'selected_source', text='Source', icon='ARMATURE_DATA')
+
+			layout.prop(ctx, 'selected_source', text='Source', icon='ARMATURE_DATA')
 			layout.separator()
 
-			if s.source == None:
+			if ctx.source == None:
 				layout.label(text='Choose a source armature to continue', icon='INFO')
 			else:
-				loadsave.draw_panel(layout.box())
+				loadsave.draw_panel(ctx, layout.box())
 				layout.separator()
 				layout.label(text='Bone Mappings')
-				mapping.draw_panel(layout.box())
+				mapping.draw_panel(ctx, layout.box())
 
-				if not s.editing_mappings and len(s.mappings) > 0:
+				if not ctx.ui_editing_mappings and len(ctx.mappings) > 0:
 					layout.separator()
 					layout.label(text='Rest Alignment')
-					alignment.draw_panel(layout.box())
+					alignment.draw_panel(ctx, layout.box())
 
-					if s.get_alignments_count() > 0:
+					if ctx.get_bone_alignments_count() > 0:
 						layout.separator()
 						layout.label(text='Corrections')
-						corrections.draw_panel(layout.box())
+						corrections.draw_panel(ctx, layout.box())
 
 						layout.separator()
 						layout.label(text='Baking')
-						baking.draw_panel(layout.box())
+						baking.draw_panel(ctx, layout.box())
 
 						layout.separator()
 						layout.label(text='Options')
 						box = layout.box()
-						box.prop(s, 'disable_drivers', text='Disable Drivers')
+						box.prop(ctx, 'setting_disable_drivers', text='Disable Drivers')
 						
 		else:
 			layout.label(text='Select target armature', icon='ERROR')
+
 
 
 classes = (

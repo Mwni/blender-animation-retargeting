@@ -11,28 +11,28 @@ bl_info = {
 }
 
 import bpy
+from . import context
 from . import main
-from . import data
-from . import loadsave
 from . import mapping
 from . import alignment
 from . import corrections
 from . import baking
 from . import drivers
 from . import ik
+from . import loadsave
 from importlib import reload
 
 
 modules = [
-	data,
+	context,
 	main,
-	loadsave,
 	mapping,
 	alignment,
 	corrections,
 	baking,
 	drivers,
-	ik
+	ik,
+	loadsave,
 ]
 
 
@@ -44,7 +44,7 @@ def register():
 		for cls in module.classes:
 			bpy.utils.register_class(cls)
 
-	bpy.types.Object.animation_retarget_state = bpy.props.PointerProperty(type=modules[0].State)
+	bpy.types.Object.retargeting_context = bpy.props.PointerProperty(type=modules[0].Context)
 
 
 def unregister():
@@ -52,4 +52,4 @@ def unregister():
 		for cls in module.classes:
 			bpy.utils.unregister_class(cls)
 
-	del bpy.types.Object.animation_retarget_state
+	del bpy.types.Object.retargeting_context

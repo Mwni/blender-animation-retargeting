@@ -1,16 +1,14 @@
-import bpy
 import os
+import bpy
 from bpy_extras.io_utils import ImportHelper
-from .utilfuncs import *
 
 
-def draw_panel(layout):
-	s = state()
+def draw_panel(ctx, layout):
 	row = layout.row()
-	row.prop(s, 'bake_step', text='Frame Step')
-	row.prop(s, 'bake_linear', text='Linear Interpolation')
-	layout.operator('retarget_baking.bake')
-	layout.operator('retarget_baking.batch_import')
+	row.prop(ctx, 'setting_bake_step', text='Frame Step')
+	row.prop(ctx, 'setting_bake_linear', text='Linear Interpolation')
+	layout.operator(BakingBakeOperator.bl_idname)
+	layout.operator(BakingBatchFBXImportOperator.bl_idname)
 
 
 def get_keyframes(obj):
@@ -34,12 +32,10 @@ def find_action(name):
 	return None
 
 
-def transfer_anim(context):
-	s = state()
-
-	keyframes = get_keyframes(s.source)
-	source_action = s.source.animation_data.action
-	target_action_name = s.target.name + '|' + source_action.name.replace(s.source.name + '|', '')
+def transfer_anim(ctx):
+	keyframes = get_keyframes(ctx.source)
+	source_action = ctx.source.animation_data.action
+	target_action_name = ctx.target.name + '|' + source_action.name.replace(ctx.source.name + '|', '')
 	target_action = find_action(target_action_name)
 
 	if target_action != None:
@@ -48,20 +44,20 @@ def transfer_anim(context):
 	else:
 		target_action = bpy.data.actions.new(target_action_name)
 
-	s.target.animation_data.action = target_action
+	ctx.target.animation_data.action = target_action
 
 	bpy.ops.nla.bake(
 		frame_start=int(min(keyframes)),
 		frame_end=int(max(keyframes)),
-		step=int(s.bake_step),
+		step=int(ctx.setting_bake_step),
 		visual_keying=True,
 		use_current_action=True,
 		bake_types={'POSE'},
 		only_selected=False
 	)
 
-	if s.bake_linear:
-		for fc in s.target.animation_data.action.fcurves:
+	if ctx.setting_bake_linear:
+		for fc in ctx.target.animation_data.action.fcurves:
 			for kp in fc.keyframe_points:
 				kp.interpolation = 'LINEAR'
 
@@ -69,19 +65,21 @@ def transfer_anim(context):
 
 
 
-class BakeOperator(bpy.types.Operator):
-	bl_idname = 'retarget_baking.bake'
+class BakingBakeOperator(bpy.types.Operator):
+	bl_idname = 'baking.bake'
 	bl_label = 'Bake into Action'
+	bl_description = 'Inserts animation keyframes transferred from the source based on the configured retargeting'
 
 	def execute(self, context):
-		transfer_anim(context)
+		transfer_anim(context.object.retargeting_context)
 		return {'FINISHED'}
 
 
 
-class BatchImportOperator(bpy.types.Operator, ImportHelper):
-	bl_idname = 'retarget_baking.batch_import'
+class BakingBatchFBXImportOperator(bpy.types.Operator, ImportHelper):
+	bl_idname = 'baking.batch_import'
 	bl_label = 'Batch FBX Import & Bake'
+	bl_description = 'Select multiple FBX files having the same source armature, and bake each file\'s animations into an Action on the target armature'
 	directory: bpy.props.StringProperty(subtype='DIR_PATH')
 	files: bpy.props.CollectionProperty(name='File paths', type=bpy.types.OperatorFileListElement)
 	filter_glob: bpy.props.StringProperty(
@@ -91,7 +89,7 @@ class BatchImportOperator(bpy.types.Operator, ImportHelper):
 	)
 
 	def execute(self, context):
-		s = state()
+		ctx = context.object.retargeting_context
 
 		bpy.context.window_manager.progress_begin(0, len(self.files) * 2)
 		progress = 0
@@ -123,13 +121,13 @@ class BatchImportOperator(bpy.types.Operator, ImportHelper):
 
 			if imported_source != None:
 				imported_action = imported_source.animation_data.action
-				imported_source.scale = s.source.scale
-				bpy.context.view_layer.objects.active = s.target
-				s.target.select_set(True)
-				prev = s.source
-				s.selected_source = imported_source
-				transfer_anim(bpy.context)
-				s.selected_source = prev
+				imported_source.scale = ctx.source.scale
+				bpy.context.view_layer.objects.active = ctx.target
+				ctx.target.select_set(True)
+				prev = ctx.source
+				ctx.selected_source = imported_source
+				transfer_anim(ctx)
+				ctx.selected_source = prev
 				imported_source.animation_data.action = None
 				bpy.data.actions.remove(imported_action)
 
@@ -146,6 +144,6 @@ class BatchImportOperator(bpy.types.Operator, ImportHelper):
 
 
 classes = (
-	BakeOperator,
-	BatchImportOperator
+	BakingBakeOperator,
+	BakingBatchFBXImportOperator
 )
