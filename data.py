@@ -198,16 +198,6 @@ class State(bpy.types.PropertyGroup):
 
 		return meshes
 
-	def get_mesh_baseline(self, t):
-		meshes = self.get_meshes(t)
-		baseline = 9999999
-
-		for mesh in meshes:
-			baseline = min(baseline, bounds(mesh, True).z.min)
-
-		return baseline
-
-
 	def update_drivers(self):
 		if self.is_importing:
 			return
@@ -218,8 +208,6 @@ class State(bpy.types.PropertyGroup):
 		else:
 			self.unleash()
 
-	def force_drivers_refresh(self):
-		drivers.force_refresh()
 
 	def update_ik_limbs(self):
 		if self.is_importing:

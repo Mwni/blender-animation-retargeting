@@ -47,26 +47,6 @@ class RT_UL_mappings(bpy.types.UIList):
 
 
 
-class LoadOperator(bpy.types.Operator):
-	bl_idname = 'retarget_mappings.load'
-	bl_label = 'Load'
-
-	def execute(self, context):
-		state().editing_mappings = True
-		return {'FINISHED'}
-
-
-
-class SaveOperator(bpy.types.Operator):
-	bl_idname = 'retarget_mappings.save'
-	bl_label = 'Load'
-
-	def execute(self, context):
-		state().editing_mappings = True
-		return {'FINISHED'}
-
-
-
 class EditOperator(bpy.types.Operator):
 	bl_idname = 'retarget_mappings.edit'
 	bl_label = 'Create'
