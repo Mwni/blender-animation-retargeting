@@ -2,6 +2,7 @@ import bpy
 from . import drivers
 from . import ik
 from .utilfuncs import *
+from .log import info
 
 
 class BoneMapping(bpy.types.PropertyGroup):
@@ -132,6 +133,8 @@ class State(bpy.types.PropertyGroup):
 					bpy.context.window_manager.popup_menu(draw, title='Incompatible armature', icon='ERROR')
 
 				return
+			
+		info('set source armature to %s' % self.selected_source.name)
 
 		self.source = self.selected_source
 		self.update_drivers()

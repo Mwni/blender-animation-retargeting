@@ -11,7 +11,6 @@ def draw_panel(layout):
 	row.prop(s, 'bake_linear', text='Linear Interpolation')
 	layout.operator('retarget_baking.bake')
 	layout.operator('retarget_baking.batch_import')
-	pass
 
 
 def get_keyframes(obj):
@@ -82,7 +81,7 @@ class BakeOperator(bpy.types.Operator):
 
 class BatchImportOperator(bpy.types.Operator, ImportHelper):
 	bl_idname = 'retarget_baking.batch_import'
-	bl_label = 'Batch Import & Bake'
+	bl_label = 'Batch FBX Import & Bake'
 	directory: bpy.props.StringProperty(subtype='DIR_PATH')
 	files: bpy.props.CollectionProperty(name='File paths', type=bpy.types.OperatorFileListElement)
 	filter_glob: bpy.props.StringProperty(

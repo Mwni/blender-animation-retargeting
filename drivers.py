@@ -1,6 +1,7 @@
 import bpy
 from mathutils import Matrix, Vector, Quaternion
 from .utilfuncs import *
+from .log import info
 
 
 def extract_rot_from_mat(mat, axis):
@@ -122,6 +123,8 @@ def clear():
 			limb.target_empty.driver_remove('location')
 			limb.target_empty.driver_remove('rotation_euler')
 
+	info('cleared drivers')
+
 
 def create_vars(loc_driver, rot_driver, t, s_source, mapping_source, space, offset=0):
 	src_vars = []
@@ -172,17 +175,12 @@ def build():
 			loc_driver.expression = "rt_bone_loc('%s','%s','%s',%s)" % (axis, s.target.name, mapping.target, ','.join(src_vars))
 			rot_driver.expression = "rt_bone_rot('%s','%s','%s',%s)" % (axis, s.target.name, mapping.target, ','.join(src_vars))
 
-	print('rebuild drivers')
-
-
 	
 	for i, limb in enumerate(s.ik_limbs):
 		if not limb.enabled:
 			continue
 
 		mapping = s.get_mapping_for_target(limb.target_bone)
-		src_arma, src_pose = s.get_pose_and_arma_bone('source', mapping.source)
-		dest_arma, dest_pose = s.get_pose_and_arma_bone('target', mapping.target)
 
 		loc_drivers = limb.target_empty.driver_add('location')
 		rot_drivers = limb.target_empty.driver_add('rotation_euler')
@@ -196,6 +194,8 @@ def build():
 
 			loc_driver.expression = "rt_ikt_loc('%s','%s',%i,%s)" % (axis, s.target.name, i, ','.join(src_vars + ctl_vars))
 			rot_driver.expression = "rt_ikt_rot('%s','%s',%i,%s)" % (axis, s.target.name, i, ','.join(src_vars + ctl_vars))
+
+	info('rebuilt drivers')
 
 
 classes = []

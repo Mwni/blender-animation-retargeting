@@ -38,6 +38,8 @@ def clear():
 			bpy.data.objects.remove(limb.control_holder, do_unlink=True)
 			limb.control_holder = None
 
+	info('cleared IKs')
+
 
 def build():
 	s = state()
@@ -130,6 +132,7 @@ def build():
 		limb.control_holder = ch
 		limb.control_cube = cc
 
+	info('rebuilt IKs')
 
 
 
