@@ -18,7 +18,10 @@ def draw_panel(layout):
 			row.operator('retarget_alignment.reset', text='', icon='X')
 	else:
 		layout.label(text='Editing Rest Pose Alignment', icon='POSE_HLT')
-		layout.label(text='Align the rest pose with the source', icon='INFO')
+
+		col = layout.column()
+		col.label(text='Align the target\'s pose with the source.', icon='INFO')
+		col.label(text='The target should mimic the pose of the source as close as possible.')
 
 		row = layout.row()
 		row.operator('retarget_alignment.cancel', text='Cancel', icon='X')

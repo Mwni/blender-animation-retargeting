@@ -53,7 +53,7 @@ class MainPanel(bpy.types.Panel):
 						box.prop(s, 'disable_drivers', text='Disable Drivers')
 						
 		else:
-			layout.label(text='No armature selected', icon='ERROR')
+			layout.label(text='Select target armature', icon='ERROR')
 
 
 classes = (
