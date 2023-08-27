@@ -19,6 +19,7 @@ from . import alignment
 from . import corrections
 from . import baking
 from . import drivers
+from . import ik
 from importlib import reload
 
 
@@ -31,6 +32,7 @@ modules = [
 	corrections,
 	baking,
 	drivers,
+	ik
 ]
 
 

@@ -2,6 +2,7 @@
 import bpy
 from mathutils import Vector
 from .utilfuncs import *
+from .log import info
 
 
 def clear():
@@ -129,3 +130,7 @@ def build():
 		limb.control_holder = ch
 		limb.control_cube = cc
 
+
+
+
+classes = []
