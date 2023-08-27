@@ -6,13 +6,13 @@ from .drivers import update_drivers
 
 def draw_panel(ctx, layout):
 	row = layout.row()
-	row.operator(LoadOperator.bl_idname, icon='FILEBROWSER')
-	row.operator(SaveOperator.bl_idname, icon='FILE_TICK')
+	row.operator(SavefileLoadOperator.bl_idname, icon='FILEBROWSER')
+	row.operator(SavefileSaveOperator.bl_idname, icon='FILE_TICK')
 
 
 
-class LoadOperator(bpy.types.Operator, ImportHelper):
-	bl_idname = 'loadsave.load'
+class SavefileLoadOperator(bpy.types.Operator, ImportHelper):
+	bl_idname = 'savefile.load'
 	bl_label = 'Load Config'
 	bl_description = 'Load bone mappings, alignments and other settings from a file. Can be applied to any armature with identical bone names'
 
@@ -29,8 +29,8 @@ class LoadOperator(bpy.types.Operator, ImportHelper):
 
 
 
-class SaveOperator(bpy.types.Operator, ExportHelper):
-	bl_idname = 'loadsave.save'
+class SavefileSaveOperator(bpy.types.Operator, ExportHelper):
+	bl_idname = 'savefile.save'
 	bl_label = 'Save Config'
 	filename_ext = '.blend-retarget'
 	bl_description = 'Save bone mappings, alignments and other settings from a file. Can be applied to any armature with identical bone names'
@@ -107,8 +107,7 @@ def load_serialized_state(ctx, data):
 
 
 
-
 classes = (
-	LoadOperator,
-	SaveOperator
+	SavefileLoadOperator,
+	SavefileSaveOperator
 )

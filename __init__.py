@@ -19,7 +19,7 @@ from . import corrections
 from . import baking
 from . import drivers
 from . import ik
-from . import loadsave
+from . import savefile
 from importlib import reload
 
 
@@ -32,7 +32,7 @@ modules = [
 	baking,
 	drivers,
 	ik,
-	loadsave,
+	savefile,
 ]
 
 

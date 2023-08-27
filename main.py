@@ -1,5 +1,5 @@
 import bpy
-from . import loadsave
+from . import savefile
 from . import mapping
 from . import alignment
 from . import corrections
@@ -29,7 +29,7 @@ class MainPanel(bpy.types.Panel):
 			if ctx.source == None:
 				layout.label(text='Choose a source armature to continue', icon='INFO')
 			else:
-				loadsave.draw_panel(ctx, layout.box())
+				savefile.draw_panel(ctx, layout.box())
 				layout.separator()
 				layout.label(text='Bone Mappings')
 				mapping.draw_panel(ctx, layout.box())
