@@ -17,7 +17,7 @@ class LoadOperator(bpy.types.Operator, ImportHelper):
 	bl_description = 'Load bone mappings, alignments and other settings from a file. Can be applied to any armature with identical bone names'
 
 	filter_glob: bpy.props.StringProperty(
-		default='*.blend-retarget-cfg',
+		default='*.blend-retarget',
 		options={'HIDDEN'},
 		maxlen=255
 	)
@@ -32,11 +32,11 @@ class LoadOperator(bpy.types.Operator, ImportHelper):
 class SaveOperator(bpy.types.Operator, ExportHelper):
 	bl_idname = 'retarget.save'
 	bl_label = 'Save Config'
-	filename_ext = '.rtconf'
+	filename_ext = '.blend-retarget'
 	bl_description = 'Save bone mappings, alignments and other settings from a file. Can be applied to any armature with identical bone names'
 
 	filter_glob: bpy.props.StringProperty(
-		default='*.rtconf',
+		default='*.blend-retarget',
 		options={'HIDDEN'},
 		maxlen=255
 	)
