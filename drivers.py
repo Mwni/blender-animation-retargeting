@@ -176,9 +176,14 @@ def drive_bone_mat(name, bone, src):
 	src_ref_mat = rot_mat(ctx.source.matrix_world) @ rot_mat(src_data.matrix_local)
 	dest_ref_mat = rot_mat(ctx.target.matrix_world) @ rot_mat(rest_mat)
 	diff_mat = src_ref_mat.inverted() @ dest_ref_mat
-	scale = ctx.source.scale[0]
 
-	mat.translation *= scale
+	scale = ctx.source.matrix_world.to_scale()
+	scale_matrix = Matrix.Identity(4)
+	scale_matrix[0][0] = scale.x
+	scale_matrix[1][1] = scale.y
+	scale_matrix[2][2] = scale.z
+
+	mat = scale_matrix @ mat
 	mat = diff_mat.inverted() @ mat @ diff_mat
 	mat = offset_mat @ mat
 
