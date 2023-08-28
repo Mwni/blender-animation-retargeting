@@ -5,6 +5,8 @@ def draw_panel(ctx, layout):
 	n = len(ctx.mappings)
 
 	if not ctx.ui_editing_mappings:
+		layout.enabled = not ctx.ui_editing_alignment
+
 		if n == 0:
 			row = layout.row()
 			row.label(text='No Bone Mappings', icon='INFO')

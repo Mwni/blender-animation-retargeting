@@ -6,6 +6,8 @@ from .log import info
 
 
 def draw_panel(ctx, layout):
+	layout.enabled = not ctx.ui_editing_mappings and not ctx.ui_editing_alignment
+	
 	if ctx.setting_disable_drivers:
 		split = layout.split(factor=0.63)
 		split.label(text='Bone Drivers disabled', icon='ERROR')

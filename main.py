@@ -24,7 +24,10 @@ class MainPanel(bpy.types.Panel):
 			split.column().label(text='Target:')
 			split.column().label(text=context.object.name, icon='ARMATURE_DATA')
 
-			layout.prop(ctx, 'selected_source', text='Source', icon='ARMATURE_DATA')
+			row = layout.row()
+			row.enabled = not ctx.ui_editing_mappings and not ctx.ui_editing_alignment
+			row.prop(ctx, 'selected_source', text='Source', icon='ARMATURE_DATA')
+
 			layout.separator()
 
 			if ctx.source == None:

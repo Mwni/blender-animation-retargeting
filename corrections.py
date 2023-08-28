@@ -2,6 +2,7 @@ import bpy
 
 
 def draw_panel(ctx, layout):
+	layout.enabled = not ctx.ui_editing_mappings and not ctx.ui_editing_alignment
 	layout.prop(ctx, 'setting_correct_feet', text='Correct Feet Position')
 	if ctx.setting_correct_feet:
 		row = layout.box().row()

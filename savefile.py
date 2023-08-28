@@ -5,6 +5,8 @@ from .drivers import update_drivers
 
 
 def draw_panel(ctx, layout):
+	layout.enabled = not ctx.ui_editing_mappings and not ctx.ui_editing_alignment
+
 	row = layout.row()
 	row.operator(SavefileLoadOperator.bl_idname, icon='FILEBROWSER')
 	row.operator(SavefileSaveOperator.bl_idname, icon='FILE_TICK')
