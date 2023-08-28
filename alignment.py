@@ -75,7 +75,7 @@ def leave_alignment_mode(ctx):
 
 def handle_edit_change(self, context):
 	if bpy.context.object.mode != 'POSE':
-		leave_alignment_mode(context.object.retargeting_context)
+		leave_alignment_mode(bpy.context.object.retargeting_context)
 
 
 
