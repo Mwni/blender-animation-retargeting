@@ -31,6 +31,34 @@ def draw_panel(ctx, layout):
 		layout.operator(MappingsApplyOperator.bl_idname, text='Done')
 
 
+
+def enter_mapping_mode(ctx):
+	ctx.ui_editing_mappings = True
+	ctx.get_source_armature().pose_position = 'REST'
+	ctx.get_target_armature().pose_position = 'REST'
+	ctx.source.select_set(True)
+
+	bpy.ops.object.mode_set(mode='POSE')
+	bpy.app.handlers.depsgraph_update_post.append(handle_edit_change)
+
+
+def leave_mapping_mode(ctx):
+	if handle_edit_change in bpy.app.handlers.depsgraph_update_post:
+		bpy.app.handlers.depsgraph_update_post.remove(handle_edit_change)
+
+	ctx.ui_editing_mappings = False
+	ctx.get_source_armature().pose_position = 'POSE'
+	ctx.get_target_armature().pose_position = 'POSE'
+	ctx.source.select_set(False)
+
+	bpy.ops.object.mode_set(mode='OBJECT')
+	
+
+def handle_edit_change(self, context):
+	if bpy.context.object.mode != 'POSE':
+		leave_mapping_mode(bpy.context.object.retargeting_context)
+
+
 def count_incompatible_mappings(ctx, target):
 	count = 0
 
@@ -78,7 +106,7 @@ class MappingsEditOperator(bpy.types.Operator):
 	bl_description = 'Map individual bones from the source armature to the target armature'
 
 	def execute(self, context):
-		context.object.retargeting_context.ui_editing_mappings = True
+		enter_mapping_mode(context.object.retargeting_context)
 		return {'FINISHED'}
 
 
@@ -101,7 +129,7 @@ class MappingsApplyOperator(bpy.types.Operator):
 			)
 			return
 
-		ctx.ui_editing_mappings = False
+		leave_mapping_mode(context.object.retargeting_context)
 		return {'FINISHED'}
 
 
