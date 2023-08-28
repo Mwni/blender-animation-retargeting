@@ -1,5 +1,5 @@
 import bpy
-from .drivers import update_drivers
+from .drivers import clear_drivers, update_drivers
 from .util import matrix_to_list, list_to_matrix
 
 
@@ -33,7 +33,7 @@ def enter_alignment_mode(ctx):
 	ctx.get_source_armature().pose_position = 'REST'
 	bpy.ops.object.mode_set(mode='POSE')
 
-	# todo: s.unleash()
+	clear_drivers(ctx)
 	ctx.target_pose_backup.clear()
 
 	for bone in ctx.target.pose.bones:
