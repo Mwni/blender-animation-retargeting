@@ -33,7 +33,7 @@ def update_drivers(ctx):
 	if ctx.is_importing:
 		return
 
-	if not ctx.setting_disable_drivers and ctx.get_bone_alignments_count() > 0:
+	if not ctx.setting_disable_drivers and (ctx.get_bone_alignments_count() > 0 or ctx.did_setup_empty_alignment):
 		update_ik_controls(ctx)
 		clear_drivers(ctx)
 		build_drivers(ctx)

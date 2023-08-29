@@ -53,6 +53,7 @@ class Context(bpy.types.PropertyGroup):
 	target: bpy.props.PointerProperty(type=bpy.types.Object)
 	target_pose_backup: bpy.props.CollectionProperty(type=BonePose)
 	mappings: bpy.props.CollectionProperty(type=BoneMapping)
+	did_setup_empty_alignment: bpy.props.BoolProperty(default=False)
 	active_mapping: bpy.props.IntProperty()
 	ik_limbs: bpy.props.CollectionProperty(type=IKLimb)
 	is_importing: bpy.props.BoolProperty(default=False)
@@ -145,10 +146,9 @@ class Context(bpy.types.PropertyGroup):
 	def reset(self):
 		self.mappings.clear()
 		self.ik_limbs.clear()
-		self.correct_feet = False
-		self.correct_hands = False
-		self.editing_alignment = False
-		self.editing_mappings = False
+		self.setting_correct_feet = False
+		self.setting_correct_hands = False
+		self.did_setup_empty_alignment = True
 
 
 

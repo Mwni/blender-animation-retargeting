@@ -7,13 +7,13 @@ def draw_panel(ctx, layout):
 	n = ctx.get_bone_alignments_count()
 
 	if not ctx.ui_editing_alignment:
-		if n == 0:
+		if n == 0 and not ctx.did_setup_empty_alignment:
 			row = layout.row()
-			row.label(text='No Rest Pose Alignment', icon='INFO')
+			row.label(text='No rest pose alignment', icon='INFO')
 			row.operator(AlignmentEditOperator.bl_idname, text='Set Up', icon='POSE_HLT')
 		else:
 			row = layout.row()
-			row.label(text='%i Bones with Alignment' % n, icon='POSE_HLT')
+			row.label(text='%i Bones with alignment' % n if n > 0 else 'Rest pose is alignment pose', icon='POSE_HLT')
 			row.operator(AlignmentEditOperator.bl_idname, text='Edit', icon='TOOL_SETTINGS')
 			row.operator(AlignmentResetOperator.bl_idname, text='', icon='X')
 	else:
@@ -98,6 +98,33 @@ class AlignmentApplyOperator(bpy.types.Operator):
 	def execute(self, context):
 		ctx = context.object.retargeting_context
 		store_alignments(ctx)
+
+		if ctx.get_bone_alignments_count() == 0 and not ctx.did_setup_empty_alignment:
+			context.window_manager.popup_menu(
+				title='Alignment pose is rest pose?',
+				icon='QUESTION',
+				draw_func=lambda self, _: (
+					self.layout.label(text='You have not adjusted the alignment pose.'),
+					self.layout.label(text='Does the current rest pose already fit the source?'),
+					self.layout.operator(AlignmentUseEmptyPoseOperator.bl_idname, text='Yes, use this pose', icon='CHECKMARK')
+				)
+			)
+			return {'CANCELLED'}
+
+		leave_alignment_mode(ctx)
+
+		return {'FINISHED'}
+
+
+
+class AlignmentUseEmptyPoseOperator(bpy.types.Operator):
+	bl_idname = 'alignment.use_empty_pose'
+	bl_label = 'Use Empty Alignment Pose'
+	bl_description = 'Use the original rest pose as alignment pose'
+
+	def execute(self, context):
+		ctx = context.object.retargeting_context
+		ctx.did_setup_empty_alignment = True
 		leave_alignment_mode(ctx)
 		return {'FINISHED'}
 
@@ -110,7 +137,7 @@ class AlignmentCancelOperator(bpy.types.Operator):
 
 	def execute(self, context):
 		leave_alignment_mode(context.object.retargeting_context)
-		return {'FINISHED'}
+		return {'CANCELLED'}
 
 
 
@@ -125,6 +152,7 @@ class AlignmentResetOperator(bpy.types.Operator):
 
 	def execute(self, context):
 		ctx = context.object.retargeting_context
+		ctx.did_setup_empty_alignment = False
 
 		for mapping in ctx.mappings:
 			mapping.reset_offset()
@@ -137,6 +165,7 @@ class AlignmentResetOperator(bpy.types.Operator):
 classes = (
 	AlignmentEditOperator,
 	AlignmentApplyOperator,
+	AlignmentUseEmptyPoseOperator,
 	AlignmentCancelOperator,
 	AlignmentResetOperator
 )
