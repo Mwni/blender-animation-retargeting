@@ -1,10 +1,10 @@
 bl_info = {
 	'name' : 'Animation Retargeting',
 	'author' : 'Mwni',
-	'description' : 'Retarget animations from one rig to another',
-	'version': (1, 1, 0),
+	'description' : 'Retarget animations from one armature to another',
+	'version': (2, 0, 0),
 	'blender' : (2, 80, 0),
-	'location' : '3D View > Tools (Right Side) > Retarget',
+	'location' : '3D View > Tools (Right Side) > Retargeting',
 	'category' : 'Animation',
 	'wiki_url': 'https://github.com/Mwni/blender-animation-retargeting',
     'tracker_url': 'https://github.com/Mwni/blender-animation-retargeting/issues',
