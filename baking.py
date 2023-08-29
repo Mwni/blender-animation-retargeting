@@ -5,12 +5,12 @@ from .drivers import update_drivers
 
 
 def draw_panel(ctx, layout):
-	layout.enabled = not ctx.ui_editing_mappings and not ctx.ui_editing_alignment
+	layout.enabled = not ctx.ui_editing_mappings and not ctx.ui_editing_alignment and not ctx.setting_disable_drivers
 	row = layout.row()
 	row.prop(ctx, 'setting_bake_step', text='Frame Step')
 	row.prop(ctx, 'setting_bake_linear', text='Linear Interpolation')
-	layout.operator(BakingBakeOperator.bl_idname)
-	layout.operator(BakingBatchFBXImportOperator.bl_idname)
+	layout.operator(BakingBakeOperator.bl_idname, icon='RENDER_ANIMATION')
+	layout.operator(BakingBatchFBXImportOperator.bl_idname, icon='FILE_FOLDER')
 
 
 def get_keyframes(obj):

@@ -56,7 +56,7 @@ def draw_panel(ctx, layout):
 		col.operator(MappingsListActionOperator.bl_idname, icon='ADD', text='').action = 'ADD'
 		col.operator(MappingsListActionOperator.bl_idname, icon='REMOVE', text='').action = 'REMOVE'
 
-		layout.operator(MappingsApplyOperator.bl_idname, text='Done')
+		layout.operator(MappingsApplyOperator.bl_idname, text='Done', icon='CHECKMARK')
 
 
 

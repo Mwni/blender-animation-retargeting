@@ -21,7 +21,7 @@ def draw_panel(ctx, layout):
 
 		col = layout.column()
 		col.label(text='Align the target\'s pose with the source.', icon='INFO')
-		col.label(text='The target should mimic the pose of the source as close as possible.')
+		col.label(text='        The target should mimic the pose of the source as close as possible.')
 
 		row = layout.row()
 		row.operator(AlignmentCancelOperator.bl_idname, text='Cancel', icon='X')

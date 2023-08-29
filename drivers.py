@@ -11,7 +11,7 @@ def draw_panel(ctx, layout):
 	if ctx.setting_disable_drivers:
 		split = layout.split(factor=0.63)
 		split.label(text='Bone Drivers disabled', icon='ERROR')
-		split.operator(DriversEnableOperator.bl_idname, text='Enable')
+		split.operator(DriversEnableOperator.bl_idname, text='Enable', icon='CHECKMARK')
 	else:
 		split = layout.split(factor=0.38)
 		status = split.column()

@@ -10,7 +10,7 @@ from . import baking
 class MainPanel(bpy.types.Panel):
 	bl_idname = 'RT_PT_Main'
 	bl_label = 'Animation Retargeting'
-	bl_category = 'Retarget'
+	bl_category = 'Retargeting'
 	bl_space_type = 'VIEW_3D'
 	bl_region_type = 'UI'
 
@@ -43,7 +43,7 @@ class MainPanel(bpy.types.Panel):
 					layout.label(text='Rest Alignment')
 					alignment.draw_panel(ctx, layout.box())
 
-					if ctx.get_bone_alignments_count() > 0:
+					if ctx.get_bone_alignments_count() > 0 or ctx.did_setup_empty_alignment:
 						layout.separator()
 						layout.label(text='Corrections')
 						corrections.draw_panel(ctx, layout.box())
