@@ -64,6 +64,7 @@ class Context(bpy.types.PropertyGroup):
 	setting_bake_linear: bpy.props.BoolProperty(default=False)
 
 	ui_editing_mappings: bpy.props.BoolProperty(default=False)
+	ui_guessing_mappings: bpy.props.BoolProperty(default=False)
 	ui_editing_alignment: bpy.props.BoolProperty(default=False)
 
 
@@ -135,6 +136,10 @@ class Context(bpy.types.PropertyGroup):
 				return limb
 
 		return None
+	
+
+	def get_guessing_bones(self):
+		return [bone for bone in bpy.context.selected_pose_bones if bone.name in self.target.pose.bones]
 		
 
 	def reset(self):
