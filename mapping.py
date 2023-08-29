@@ -76,6 +76,9 @@ def guess_mappings(ctx):
 	source_sides = guess_group_by_side(source_bones)
 	target_sides = guess_group_by_side(target_bones)
 
+	print(source_bones)
+	print(target_bones)
+
 	mappings = []
 
 	for side in ('l', 'r', 'x'):
@@ -151,24 +154,36 @@ def guess_group_by_side(bones):
 		if bone in groups['l'] or bone in groups['r']:
 			continue
 
-		matched_partner = None
-		potential_partners = [b for b in bones if b != bone and len(b) == len(bone)]
-		
-		for i, char in enumerate(bone):
-			if char.lower() not in ('l', 'r'):
-				continue
+		found_match = False
 
-			for partner in potential_partners:
-				if bone == partner[0:i] + char + partner[i+1:]:
-					matched_partner = partner
+		if 'right' in bone.lower():
+			for partner in bones:
+				if partner == bone:
+					continue
+
+				if bone.lower() == partner.lower().replace('left', 'right'):
+					groups['r'].append(bone)
+					groups['l'].append(partner)
+					found_match = True
+					break
+		else:
+			potential_partners = [b for b in bones if b != bone and len(b) == len(bone)]
+			
+			for i, char in enumerate(bone):
+				if char.lower() != 'r':
+					continue
+
+				for partner in potential_partners:
+					if bone == partner[0:i] + char + partner[i+1:]:
+						groups['r'].append(bone)
+						groups['l'].append(partner)
+						found_match = True
+						break
+
+				if found_match:
 					break
 
-			if matched_partner:
-				groups[char.lower()].append(bone)
-				groups[matched_partner[i].lower()].append(matched_partner)
-				break
-
-		if not matched_partner:
+		if not found_match:
 			groups['x'].append(bone)
 
 	return groups
