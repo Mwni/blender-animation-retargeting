@@ -100,6 +100,7 @@ class BakingBatchFBXImportOperator(bpy.types.Operator, ImportHelper):
 	bl_idname = 'baking.batch_import'
 	bl_label = 'Batch FBX Import & Bake'
 	bl_description = 'Select multiple FBX files having the same source armature, and bake each file\'s animations into an Action on the target armature'
+	
 	directory: bpy.props.StringProperty(subtype='DIR_PATH')
 	files: bpy.props.CollectionProperty(name='File paths', type=bpy.types.OperatorFileListElement)
 	filter_glob: bpy.props.StringProperty(
@@ -107,6 +108,22 @@ class BakingBatchFBXImportOperator(bpy.types.Operator, ImportHelper):
 		options={'HIDDEN'},
 		maxlen=255
 	)
+
+	ignore_leaf_bones: bpy.props.BoolProperty(
+		name='Ignore Leaf Bones',
+		description='Ignore leaf bones during FBX import',
+		default=False,
+	)
+
+	automatic_bone_orientation: bpy.props.BoolProperty(
+		name='Automatic Bone Orientation',
+		description='Automatically orient bones during FBX import',
+		default=False,
+	)
+
+	def draw(self, context):
+		self.layout.prop(self, 'ignore_leaf_bones')
+		self.layout.prop(self, 'automatic_bone_orientation')
 
 	def execute(self, context):
 		ctx = context.object.retargeting_context
@@ -119,8 +136,8 @@ class BakingBatchFBXImportOperator(bpy.types.Operator, ImportHelper):
 				filepath=os.path.join(self.directory, file.name),
 				use_custom_props=True,
 				use_custom_props_enum_as_string=True,
-				ignore_leaf_bones=False,
-				automatic_bone_orientation=True
+				ignore_leaf_bones=self.ignore_leaf_bones,
+				automatic_bone_orientation=self.automatic_bone_orientation
 			)
 
 			bpy.context.window_manager.progress_update(progress)
