@@ -2,6 +2,7 @@ import os
 import bpy
 from bpy_extras.io_utils import ImportHelper
 from .drivers import update_drivers
+from .log import info
 
 
 def draw_panel(ctx, layout):
@@ -40,8 +41,11 @@ def transfer_anim(ctx):
 	target_action_name = ctx.target.name + '|' + source_action.name.replace(ctx.source.name + '|', '')
 	target_action = find_action(target_action_name)
 
+	info('baking %s source animation into action "%s"' % (ctx.source.name, target_action_name))
+
 	if target_action != None:
 		while len(target_action.fcurves) > 0:
+			info('action "%s" already exists: deleting it' % target_action_name)
 			target_action.fcurves.remove(target_action.fcurves[0])
 	else:
 		target_action = bpy.data.actions.new(target_action_name)
@@ -64,6 +68,8 @@ def transfer_anim(ctx):
 				kp.interpolation = 'LINEAR'
 
 	target_action.use_fake_user = True
+
+	info('bake complete')
 
 
 
