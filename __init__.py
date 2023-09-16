@@ -45,6 +45,7 @@ def register():
 			bpy.utils.register_class(cls)
 
 	bpy.types.Object.retargeting_context = bpy.props.PointerProperty(type=modules[0].Context)
+	bpy.app.handlers.load_post.append(post_load)
 
 
 def unregister():
@@ -53,3 +54,15 @@ def unregister():
 			bpy.utils.unregister_class(cls)
 
 	del bpy.types.Object.retargeting_context
+
+	if post_load in bpy.app.handlers.load_post:
+		bpy.app.handlers.load_post.remove(post_load)
+
+
+@bpy.app.handlers.persistent
+def post_load(_):
+	from .drivers import update_drivers
+
+	for obj in bpy.data.objects:
+		if obj.type == 'ARMATURE':
+			update_drivers(obj.retargeting_context)
