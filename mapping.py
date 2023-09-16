@@ -76,9 +76,6 @@ def guess_mappings(ctx):
 	source_sides = guess_group_by_side(source_bones)
 	target_sides = guess_group_by_side(target_bones)
 
-	print(source_bones)
-	print(target_bones)
-
 	mappings = []
 
 	for side in ('l', 'r', 'x'):
