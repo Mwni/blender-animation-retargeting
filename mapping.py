@@ -1,6 +1,5 @@
 import bpy
 from difflib import SequenceMatcher
-from .drivers import clear_drivers
 
 
 bone_synonyms = (
@@ -344,7 +343,7 @@ class MappingsClearOperator(bpy.types.Operator):
 	def execute(self, context):
 		ctx = context.object.retargeting_context
 		ctx.reset()
-		clear_drivers(ctx)
+		ctx.clear_drivers()
 		return {'FINISHED'}
 	
 
