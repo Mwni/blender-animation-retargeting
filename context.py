@@ -32,8 +32,8 @@ class BoneMapping(bpy.types.PropertyGroup):
 class IKLimb(bpy.types.PropertyGroup):
 	name: bpy.props.StringProperty()
 	enabled: bpy.props.BoolProperty(default=False)
-	target_bone: bpy.props.StringProperty(update=lambda self, ctx: update_ik_limbs(ctx.object.retargeting_context))
-	origin_bone: bpy.props.StringProperty(update=lambda self, ctx: update_ik_limbs(ctx.object.retargeting_context))
+	target_bone: bpy.props.StringProperty(update=lambda self, ctx: update_ik_limbs(bpy.ctx.object.retargeting_context))
+	origin_bone: bpy.props.StringProperty(update=lambda self, ctx: update_ik_limbs(bpy.ctx.object.retargeting_context))
 	target_empty: bpy.props.PointerProperty(type=bpy.types.Object)
 	target_empty_child: bpy.props.PointerProperty(type=bpy.types.Object)
 	pole_empty: bpy.props.PointerProperty(type=bpy.types.Object)
@@ -86,7 +86,7 @@ class Context(bpy.types.PropertyGroup):
 			if incompat_n > 0:
 				warn_incompatible_source_armature(incompat_n)
 				return
-			
+		
 		info('set source armature to %s' % self.selected_source.name)
 		self.source = self.selected_source
 		self.target = bpy.context.object
@@ -112,25 +112,6 @@ class Context(bpy.types.PropertyGroup):
 			for m in self.mappings
 		])
 	
-
-	def get_bone_from(self, collection, name):
-		return next((bone for bone in collection if bone.name == name), None)
-	
-
-	def get_data_bone(self, t, name):
-		return self.get_bone_from((self.source if t == 'source' else self.target).data.bones, name)
-	
-
-	def get_pose_bone(self, t, name):
-		return self.get_bone_from((self.source if t == 'source' else self.target).pose.bones, name)
-	
-
-	def get_data_and_pose_bone(self, t, name):
-		return (
-			self.get_data_bone(t, name),
-			self.get_pose_bone(t, name),
-		)
-
 
 	def get_mapping_for_target(self, name):
 		for mapping in self.mappings:

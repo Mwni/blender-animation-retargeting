@@ -47,9 +47,10 @@ def update_ik_controls(ctx):
 
 def clear_ik_controls(ctx):
 	for limb in ctx.ik_limbs:
-		target_bone = ctx.get_pose_bone('target', limb.target_bone)
 
-		if target_bone:
+		if limb.target_bone in ctx.target.pose.bones:
+			target_bone = ctx.target.pose.bones[limb.target_bone]
+
 			for con in target_bone.constraints:
 				if con.name == 'Retarget IK':
 					target_bone.constraints.remove(con)
@@ -98,8 +99,8 @@ def build_ik_controls(ctx):
 		if not limb.enabled:
 			continue
 
-		target_data_bone, target_bone = ctx.get_data_and_pose_bone('target', limb.target_bone)
-		mapping = ctx.get_mapping_for_target(limb.target_bone)
+		target_data_bone = ctx.target.data.bones[limb.target_bone]
+		target_bone = ctx.target.pose.bones[limb.target_bone]
 
 		te = bpy.data.objects.new(limb.target_bone + '-target', None)
 		tec = bpy.data.objects.new(limb.target_bone + '-target-child', None)
