@@ -202,6 +202,17 @@ def handle_edit_change(self, context):
 		leave_mapping_mode(bpy.context.object.retargeting_context)
 
 
+def get_intermediate_bones(ctx, mapping):
+	bone = ctx.source.pose.bones[mapping.source]
+	intermediate_bones = []
+
+	while bone.parent and not any(m.source == bone.parent.name for m in ctx.mappings):
+		intermediate_bones.append(bone.parent.name)
+		bone = bone.parent
+
+	return intermediate_bones
+
+
 def count_incompatible_mappings(ctx, target):
 	count = 0
 

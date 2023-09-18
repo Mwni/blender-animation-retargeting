@@ -1,5 +1,6 @@
 import bpy
 from mathutils import Matrix, Vector, Quaternion
+from .mapping import get_intermediate_bones
 from .ik import update_ik_controls, clear_ik_controls
 from .util import rot_mat, loc_mat, list_to_matrix, extract_loc_axis_from_mat, extract_rot_axis_from_mat
 from .log import info
@@ -85,6 +86,7 @@ def build_drivers(ctx):
 
 	for mapping in ctx.mappings:
 		_, dest_pose = ctx.get_data_and_pose_bone('target', mapping.target)
+		intermediate_bones = get_intermediate_bones(ctx, mapping)
 
 		dest_pose.rotation_mode = 'XYZ'
 
@@ -98,8 +100,19 @@ def build_drivers(ctx):
 
 			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), ctx.source, mapping.source, 'LOCAL_SPACE')
 
-			loc_driver.expression = "retarget_bone_loc('%s','%s','%s',%s)" % (axis, ctx.target.name, mapping.target, ','.join(src_vars))
-			rot_driver.expression = "retarget_bone_rot('%s','%s','%s',%s)" % (axis, ctx.target.name, mapping.target, ','.join(src_vars))
+			loc_driver.expression = "retarget_bone_loc('%s','%s','%s',[%s])" % (
+				axis, 
+				ctx.target.name, 
+				mapping.target, 
+				','.join(src_vars)
+			)
+			rot_driver.expression = "retarget_bone_rot('%s','%s','%s',[%s],[%s])" % (
+				axis, 
+				ctx.target.name, 
+				mapping.target, 
+				','.join(src_vars),
+				','.join(['"%s"' % bone for bone in intermediate_bones])
+			)
 
 	
 	for i, limb in enumerate(ctx.ik_limbs):
@@ -118,8 +131,8 @@ def build_drivers(ctx):
 			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), ctx.source, mapping.source, 'WORLD_SPACE')
 			ctl_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT', 'SCALE'), limb.control_cube, '', 'LOCAL_SPACE', offset=len(src_vars))
 
-			loc_driver.expression = "retarget_ik_loc('%s','%s',%i,%s)" % (axis, ctx.target.name, i, ','.join(src_vars + ctl_vars))
-			rot_driver.expression = "retarget_ik_rot('%s','%s',%i,%s)" % (axis, ctx.target.name, i, ','.join(src_vars + ctl_vars))
+			loc_driver.expression = "retarget_ik_loc('%s','%s',%i,[%s])" % (axis, ctx.target.name, i, ','.join(src_vars + ctl_vars))
+			rot_driver.expression = "retarget_ik_rot('%s','%s',%i,[%s])" % (axis, ctx.target.name, i, ','.join(src_vars + ctl_vars))
 
 	info('built drivers')
 
@@ -163,21 +176,45 @@ class DriversDisableOperator(bpy.types.Operator):
 ### DRIVER EXPRESSIONS 
 
 
-def drive_bone_mat(name, bone, src):
-	mat = Matrix.Translation(Vector(src[0:3]))
-	quat = Quaternion(src[3:])
-	mat = mat @ quat.to_matrix().to_4x4()
-
+def drive_bone_mat(name, bone, src_vars, intermediate_bones):
 	obj = bpy.data.objects[name]
 	ctx = obj.retargeting_context
 	mapping = ctx.get_mapping_for_target(bone)
+
 	rest_mat = list_to_matrix(mapping.rest)
 	offset_mat = list_to_matrix(mapping.offset)
-	src_data, src_pose = ctx.get_data_and_pose_bone('source', mapping.source)
-	dest_data, dest_pose = ctx.get_data_and_pose_bone('target', mapping.target)
+
+	src_data, _ = ctx.get_data_and_pose_bone('source', mapping.source)
 	src_ref_mat = rot_mat(ctx.source.matrix_world) @ rot_mat(src_data.matrix_local)
 	dest_ref_mat = rot_mat(ctx.target.matrix_world) @ rot_mat(rest_mat)
 	diff_mat = src_ref_mat.inverted() @ dest_ref_mat
+
+	intermediate_offset = Quaternion()
+
+	if len(intermediate_bones) > 0:
+		src_bone = ctx.get_pose_bone('source', mapping.source)
+		head_bone = ctx.get_pose_bone('source', intermediate_bones[0])
+		tail_bone = ctx.get_pose_bone('source', intermediate_bones[-1])
+
+		if tail_bone.parent:
+			base_bone = tail_bone.parent
+			base_rest = base_bone.bone.matrix_local.to_quaternion()
+			base_pose = base_bone.matrix.to_quaternion()
+		else:
+			base_rest = Quaternion()
+			base_pose = Quaternion()
+
+		head_rest = head_bone.bone.matrix_local.to_quaternion()
+		head_pose = head_bone.matrix.to_quaternion()
+
+		based_pose = base_pose.inverted() @ head_pose
+		based_rest = base_rest.inverted() @ head_rest
+
+		based_delta = based_rest.inverted() @ based_pose
+		mapped_delta = src_bone.bone.matrix.to_quaternion().inverted() @ based_delta @ src_bone.bone.matrix.to_quaternion()
+
+		intermediate_offset = mapped_delta
+
 
 	scale = ctx.source.matrix_world.to_scale()
 	scale_matrix = Matrix.Identity(4)
@@ -185,36 +222,40 @@ def drive_bone_mat(name, bone, src):
 	scale_matrix[1][1] = scale.y
 	scale_matrix[2][2] = scale.z
 
+	mat = Matrix.Translation(Vector(src_vars[0:3]))
+	quat = Quaternion(src_vars[3:]) @ intermediate_offset
+	mat = mat @ quat.to_matrix().to_4x4()
 	mat = scale_matrix @ mat
 	mat = diff_mat.inverted() @ mat @ diff_mat
 	mat = offset_mat @ mat
+	mat = mat
 
 	return mat
 
 
-def drive_bone_rot(axis, name, bone, *src):
-	mat = drive_bone_mat(name, bone, src)
+def drive_bone_rot(axis, name, bone, src_vars, intermediate_bones):
+	mat = drive_bone_mat(name, bone, src_vars, intermediate_bones)
 	return extract_rot_axis_from_mat(mat, axis)
 
 
-def drive_bone_loc(axis, name, bone, *src):
-	mat = drive_bone_mat(name, bone, src)
+def drive_bone_loc(axis, name, bone, src_vars):
+	mat = drive_bone_mat(name, bone, src_vars, [])
 	return extract_loc_axis_from_mat(mat, axis)
 
 
-def drive_ik_target_mat(name, index, src):
-	mat = Matrix.Translation(Vector(src[0:3]))
-	quat = Quaternion(src[3:7])
+def drive_ik_target_mat(name, index, src_vars):
+	mat = Matrix.Translation(Vector(src_vars[0:3]))
+	quat = Quaternion(src_vars[3:7])
 	mat = mat @ quat.to_matrix().to_4x4()
 
-	src = src[7:]
+	src_vars = src_vars[7:]
 
-	ctl_mat = Matrix.Translation(Vector(src[0:3]))
-	ctl_quat = Quaternion(src[3:7])
+	ctl_mat = Matrix.Translation(Vector(src_vars[0:3]))
+	ctl_quat = Quaternion(src_vars[3:7])
 	ctl_mat = ctl_mat @ ctl_quat.to_matrix().to_4x4()
-	ctl_scale = Matrix.Scale(src[7], 4, (1, 0, 0))
-	ctl_scale @= Matrix.Scale(src[8], 4, (0, 1, 0))
-	ctl_scale @= Matrix.Scale(src[9], 4, (0, 0, 1))
+	ctl_scale = Matrix.Scale(src_vars[7], 4, (1, 0, 0))
+	ctl_scale @= Matrix.Scale(src_vars[8], 4, (0, 1, 0))
+	ctl_scale @= Matrix.Scale(src_vars[9], 4, (0, 0, 1))
 	ctl_mat = ctl_mat @ ctl_scale
 
 	obj = bpy.data.objects[name]
@@ -235,13 +276,13 @@ def drive_ik_target_mat(name, index, src):
 	return mat
 
 
-def drive_ik_target_rot(axis, name, index, *src):
-	mat = drive_ik_target_mat(name, index, src)
+def drive_ik_target_rot(axis, name, index, src_vars):
+	mat = drive_ik_target_mat(name, index, src_vars)
 	return extract_rot_axis_from_mat(mat, axis)
 
 
-def drive_ik_target_loc(axis, name, index, *src):
-	mat = drive_ik_target_mat(name, index, src)
+def drive_ik_target_loc(axis, name, index, src_vars):
+	mat = drive_ik_target_mat(name, index, src_vars)
 	return extract_loc_axis_from_mat(mat, axis)
 
 
