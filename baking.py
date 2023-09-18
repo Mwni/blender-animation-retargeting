@@ -1,7 +1,6 @@
 import os
 import bpy
 from bpy_extras.io_utils import ImportHelper
-from .drivers import update_drivers
 from .log import info
 
 
@@ -83,7 +82,7 @@ class BakingBakeOperator(bpy.types.Operator):
 		transfer_anim(ctx)
 
 		ctx.setting_disable_drivers = True
-		update_drivers(ctx)
+		ctx.update_drivers()
 		
 		context.window_manager.popup_menu(
 			title='Bake Complete',

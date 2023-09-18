@@ -1,7 +1,6 @@
 import bpy
 import json
 from bpy_extras.io_utils import ExportHelper, ImportHelper
-from .drivers import update_drivers
 
 
 def draw_panel(ctx, layout):
@@ -105,7 +104,7 @@ def load_serialized_state(ctx, data):
 	ctx.setting_correct_hands = data['setting_correct_hands']
 	ctx.is_importing = False
 
-	update_drivers(ctx)
+	ctx.update_drivers()
 
 
 

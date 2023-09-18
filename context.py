@@ -1,6 +1,6 @@
 import bpy
 from .mapping import count_incompatible_mappings, warn_incompatible_source_armature
-from .drivers import update_drivers
+from .drivers import update_drivers, clear_drivers
 from .ik import update_ik_limbs
 from .log import info
 
@@ -67,6 +67,13 @@ class Context(bpy.types.PropertyGroup):
 	ui_editing_mappings: bpy.props.BoolProperty(default=False)
 	ui_guessing_mappings: bpy.props.BoolProperty(default=False)
 	ui_editing_alignment: bpy.props.BoolProperty(default=False)
+
+
+	def update_drivers(self):
+		update_drivers(self)
+
+	def clear_drivers(self):
+		clear_drivers(self)
 
 
 	def handle_source_change(self, ignore_incompat=False):
