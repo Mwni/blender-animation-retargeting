@@ -45,7 +45,7 @@ def update_drivers(ctx):
 
 def clear_drivers(ctx):
 	for mapping in ctx.mappings:
-		_, dest_pose = ctx.get_data_and_pose_bone('target', mapping.target)
+		dest_pose = ctx.target.pose.bones[mapping.target]
 		dest_pose.driver_remove('location')
 		dest_pose.driver_remove('rotation_euler')
 		dest_pose.matrix_basis = Matrix()
@@ -85,7 +85,7 @@ def build_drivers(ctx):
 	bpy.app.driver_namespace['retarget_ik_loc'] = drive_ik_target_loc
 
 	for mapping in ctx.mappings:
-		_, dest_pose = ctx.get_data_and_pose_bone('target', mapping.target)
+		dest_pose = ctx.target.pose.bones[mapping.target]
 		intermediate_bones = get_intermediate_bones(ctx, mapping)
 
 		dest_pose.rotation_mode = 'XYZ'
@@ -184,7 +184,7 @@ def drive_bone_mat(name, bone, src_vars, intermediate_bones):
 	rest_mat = list_to_matrix(mapping.rest)
 	offset_mat = list_to_matrix(mapping.offset)
 
-	src_data, _ = ctx.get_data_and_pose_bone('source', mapping.source)
+	src_data = ctx.source.data.bones[mapping.source]
 	src_ref_mat = rot_mat(ctx.source.matrix_world) @ rot_mat(src_data.matrix_local)
 	dest_ref_mat = rot_mat(ctx.target.matrix_world) @ rot_mat(rest_mat)
 	diff_mat = src_ref_mat.inverted() @ dest_ref_mat
@@ -192,9 +192,9 @@ def drive_bone_mat(name, bone, src_vars, intermediate_bones):
 	intermediate_offset = Quaternion()
 
 	if len(intermediate_bones) > 0:
-		src_bone = ctx.get_pose_bone('source', mapping.source)
-		head_bone = ctx.get_pose_bone('source', intermediate_bones[0])
-		tail_bone = ctx.get_pose_bone('source', intermediate_bones[-1])
+		src_bone = ctx.source.pose.bones[mapping.source]
+		head_bone = ctx.source.pose.bones[intermediate_bones[0]]
+		tail_bone = ctx.source.pose.bones[intermediate_bones[-1]]
 
 		if tail_bone.parent:
 			base_bone = tail_bone.parent
@@ -262,7 +262,7 @@ def drive_ik_target_mat(name, index, src_vars):
 	ctx = obj.retargeting_context
 	limb = ctx.ik_limbs[index]
 	mapping = ctx.get_mapping_for_target(limb.target_bone)
-	src_data, _ = ctx.get_data_and_pose_bone('source', mapping.source)
+	src_data = ctx.source.data.bones[mapping.source]
 
 	src_world_mat = loc_mat(ctx.source.matrix_world).inverted() @ ctx.source.matrix_world
 	src_ref_mat = ctx.source.matrix_world @ loc_mat(src_data.matrix_local)
