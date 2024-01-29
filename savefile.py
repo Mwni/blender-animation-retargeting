@@ -1,6 +1,7 @@
 import bpy
 import json
 from bpy_extras.io_utils import ExportHelper, ImportHelper
+from .util import matrix_to_list
 
 
 def draw_panel(ctx, layout):
@@ -57,6 +58,10 @@ class SavefileSaveOperator(bpy.types.Operator, ExportHelper):
 
 def serialize_state(ctx):
 	return {
+		'armatures': {
+			'source': serialize_armature(ctx.source),
+			'target': serialize_armature(ctx.target)
+		},
 		'mappings': [
 			{
 				'source': m.source,
@@ -78,6 +83,20 @@ def serialize_state(ctx):
 		], 
 		'setting_correct_feet': ctx.setting_correct_feet, 
 		'setting_correct_hands': ctx.setting_correct_hands
+	}
+
+
+def serialize_armature(armature):
+	return {
+		'matrix_world': matrix_to_list(armature.matrix_world),
+		'bones': {
+			bone.name: {
+				'parent': bone.parent.name if bone.parent else None,
+				'matrix': matrix_to_list(bone.matrix),
+				'matrix_local': matrix_to_list(bone.matrix_local)
+			}
+			for bone in armature.data.bones
+		}
 	}
 
 
