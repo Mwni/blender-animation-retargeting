@@ -25,11 +25,6 @@ This addon enables the transfer of animations and poses from one armature to ano
 
 Assuming you have both your target and source armature in the scene, and have them aligned and scaled to match each other.
 
-  
-
-*Note: The target's scale has to be (1, 1, 1), scale the source to fit the target*
-
-  
 
 ![Both armatures in rest pose next to each other, scaled to be same height](https://mwni.io/opensource/blender-retarget/setup.png)
 
@@ -43,7 +38,7 @@ Assuming you have both your target and source armature in the scene, and have th
 
 4. Now map each relevant source bone to the corresponding target. Make sure to not map any bone multiple times, otherwise you'll get undefined behaviour.
 
-5. Next you have to set up the rest pose alignment. Click on "Set up", then change the pose of your target armature in a way, that it optimally fits your source armatures rest pose. When done click 'Apply'. Caveat: at least one bone needs to be transformed (rotated, scaled or moved) otherwise this step will not complete. 
+5. Next you have to set up the rest pose alignment. Click on "Set up", then change the pose of your target armature in a way, that it optimally fits your source armatures rest pose. When done click 'Apply'.
 
 ![pose adjusted to fit source's rest pose](https://mwni.io/opensource/blender-retarget/align.png)
 
