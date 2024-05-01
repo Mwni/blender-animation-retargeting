@@ -8,7 +8,10 @@ def draw_panel(ctx, layout):
 	layout.enabled = not ctx.ui_editing_mappings and not ctx.ui_editing_alignment and not ctx.setting_disable_drivers
 	row = layout.row()
 	row.prop(ctx, 'setting_bake_step', text='Frame Step')
+	row = layout.row()
 	row.prop(ctx, 'setting_bake_linear', text='Linear Interpolation')
+	row = layout.row()
+	row.prop(ctx, 'setting_bake_selected_bones_only', text='Bake mapped target bones only')
 	layout.operator(BakingBakeOperator.bl_idname, icon='RENDER_ANIMATION')
 	layout.operator(BakingBatchFBXImportOperator.bl_idname, icon='FILE_FOLDER')
 
@@ -51,6 +54,15 @@ def transfer_anim(ctx):
 
 	ctx.target.animation_data.action = target_action
 
+	bpy.ops.object.mode_set(mode='POSE')
+	if ctx.setting_bake_selected_bones_only:
+		for mapping in ctx.mappings:
+			try:
+				target_bone = ctx.target.pose.bones[mapping.target]
+				target_bone.bone.select = True
+			except:
+				pass
+
 	bpy.ops.nla.bake(
 		frame_start=int(min(keyframes)),
 		frame_end=int(max(keyframes)),
@@ -58,7 +70,7 @@ def transfer_anim(ctx):
 		visual_keying=True,
 		use_current_action=True,
 		bake_types={'POSE'},
-		only_selected=False
+		only_selected=ctx.setting_bake_selected_bones_only
 	)
 
 	if ctx.setting_bake_linear:
