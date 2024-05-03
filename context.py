@@ -63,7 +63,7 @@ class Context(bpy.types.PropertyGroup):
 	setting_disable_drivers: bpy.props.BoolProperty(default=False)
 	setting_bake_step: bpy.props.FloatProperty(default=1.0)
 	setting_bake_linear: bpy.props.BoolProperty(default=False)
-	setting_bake_selected_bones_only: bpy.props.BoolProperty(default=False)
+	setting_bake_mapped_bones_only: bpy.props.BoolProperty(default=False)
 
 	ui_editing_mappings: bpy.props.BoolProperty(default=False)
 	ui_guessing_mappings: bpy.props.BoolProperty(default=False)
