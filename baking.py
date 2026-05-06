@@ -16,11 +16,19 @@ def draw_panel(ctx, layout):
 	layout.operator(BakingBatchFBXImportOperator.bl_idname, icon='FILE_FOLDER')
 
 
+def iter_fcurves(action):
+	for layer in action.layers:
+		for strip in layer.strips:
+			for channelbag in strip.channelbags:
+				for fcurve in channelbag.fcurves:
+					yield fcurve
+
+
 def get_keyframes(obj):
 	frames = []
 	anim = obj.animation_data
 	if anim is not None and anim.action is not None:
-		for fcu in anim.action.fcurves:
+		for fcu in iter_fcurves(anim.action):
 			for keyframe in fcu.keyframe_points:
 				x, y = keyframe.co
 				if x not in frames:
@@ -46,11 +54,10 @@ def transfer_anim(ctx):
 	info('baking %s source animation into action "%s"' % (ctx.source.name, target_action_name))
 
 	if target_action != None:
-		while len(target_action.fcurves) > 0:
-			info('action "%s" already exists: deleting it' % target_action_name)
-			target_action.fcurves.remove(target_action.fcurves[0])
-	else:
-		target_action = bpy.data.actions.new(target_action_name)
+		info('action "%s" already exists: deleting it' % target_action_name)
+		bpy.data.actions.remove(target_action)
+
+	target_action = bpy.data.actions.new(target_action_name)
 
 	ctx.target.animation_data.action = target_action
 
@@ -58,9 +65,9 @@ def transfer_anim(ctx):
 
 	for target_bone in ctx.target.pose.bones:
 		if ctx.setting_bake_mapped_bones_only:
-			target_bone.bone.select = True if ctx.get_mapping_for_target(target_bone.name) else False
+			target_bone.select = True if ctx.get_mapping_for_target(target_bone.name) else False
 		else:
-			target_bone.bone.select = True
+			target_bone.select = True
 
 	bpy.ops.nla.bake(
 		frame_start=int(min(keyframes)),
@@ -73,7 +80,7 @@ def transfer_anim(ctx):
 	)
 
 	if ctx.setting_bake_linear:
-		for fc in ctx.target.animation_data.action.fcurves:
+		for fc in iter_fcurves(ctx.target.animation_data.action):
 			for kp in fc.keyframe_points:
 				kp.interpolation = 'LINEAR'
 
