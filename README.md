@@ -72,7 +72,10 @@ Additionally it will spawn a control empty cube, that allows you to transform th
 
 ## Baking
 
-For convenience you can bake the source's animation into an action for your target via the add-on. The option "Linear Interpolation" causes the F-Curves between the keyframes to be linearized instead of the default Blender Bezier interpolation.
+For convenience you can bake the source's animation into an action for your target via the add-on. 
+
+- The option "Linear Interpolation" causes the F-Curves between the keyframes to be linearized instead of the default Blender Bezier interpolation.
+- The option "Bake Mapped Bones Only" ensures that target bones that have no retarget mapping will remain unaffected.
 
   
 

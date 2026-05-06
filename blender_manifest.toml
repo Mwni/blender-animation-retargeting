@@ -1,0 +1,16 @@
+schema_version = "1.0.0"
+
+id = "animation_retargeting"
+name = "Animation Retargeting"
+version = "2.3.1"
+tagline = "Transfer animations and poses from one armature to another"
+maintainer = "Mwni"
+license = ["SPDX:GPL-3.0-or-later"]
+type = "add-on"
+
+website = "https://github.com/Mwni/blender-animation-retargeting"
+tags = ["Animation", "Rigging"]
+blender_version_min = "4.2.0"
+
+[permissions]
+files = "Import/export FBX from/to disk"

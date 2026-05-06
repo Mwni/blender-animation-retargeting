@@ -100,11 +100,12 @@ def build_drivers(ctx):
 
 			src_vars = create_vars(loc_driver, rot_driver, ('LOC', 'ROT'), ctx.source, mapping.source, 'LOCAL_SPACE')
 
-			loc_driver.expression = "retarget_bone_loc('%s','%s','%s',[%s])" % (
+			loc_driver.expression = "retarget_bone_loc('%s','%s','%s',[%s],[%s])" % (
 				ctx.target.name, 
 				mapping.target, 
 				axis, 
-				','.join(src_vars)
+				','.join(src_vars),
+				','.join(['"%s"' % bone for bone in intermediate_bones])
 			)
 			rot_driver.expression = "retarget_bone_rot('%s','%s','%s',[%s],[%s])" % (
 				ctx.target.name, 
@@ -190,22 +191,24 @@ def drive_bone_mat(armature_name, bone_name, src_vars, intermediate_bones):
 
 		if tail_bone.parent:
 			base_bone = tail_bone.parent
-			base_rest = base_bone.bone.matrix_local.to_quaternion()
-			base_pose = base_bone.matrix.to_quaternion()
+			base_rest = base_bone.bone.matrix_local
+			base_pose = base_bone.matrix
 		else:
-			base_rest = Quaternion()
-			base_pose = Quaternion()
+			base_rest = Matrix()
+			base_pose = Matrix()
 
-		head_rest = head_bone.bone.matrix_local.to_quaternion()
-		head_pose = head_bone.matrix.to_quaternion()
+		head_rest = head_bone.bone.matrix_local
+		head_pose = head_bone.matrix
 
 		based_pose = base_pose.inverted() @ head_pose
 		based_rest = base_rest.inverted() @ head_rest
-
 		based_delta = based_rest.inverted() @ based_pose
-		mapped_delta = src_bone.bone.matrix.to_quaternion().inverted() @ based_delta @ src_bone.bone.matrix.to_quaternion()
 
-		bone_rot @= mapped_delta
+		src_rest = src_bone.bone.matrix.to_4x4()
+		mapped_delta = src_rest.inverted() @ based_delta @ src_rest
+
+		bone_rot @= mapped_delta.to_quaternion()
+		bone_loc += mapped_delta.to_translation()
 
 	rest_mat = list_to_matrix(mapping.rest)
 	offset_mat = list_to_matrix(mapping.offset)
@@ -215,14 +218,20 @@ def drive_bone_mat(armature_name, bone_name, src_vars, intermediate_bones):
 	dest_ref_mat = rot_mat(ctx.target.matrix_world) @ rot_mat(rest_mat)
 	diff_mat = src_ref_mat.inverted() @ dest_ref_mat
 
-	scale = ctx.source.matrix_world.to_scale()
-	scale_mat = Matrix.Identity(4)
-	scale_mat[0][0] = scale.x
-	scale_mat[1][1] = scale.y
-	scale_mat[2][2] = scale.z
+	src_scale = ctx.source.matrix_world.to_scale()
+	src_scale_mat = Matrix.Identity(4)
+	src_scale_mat[0][0] = src_scale.x
+	src_scale_mat[1][1] = src_scale.y
+	src_scale_mat[2][2] = src_scale.z
+
+	dest_scale = ctx.target.matrix_world.to_scale()
+	dest_scale_mat = Matrix.Identity(4)
+	dest_scale_mat[0][0] = dest_scale.x
+	dest_scale_mat[1][1] = dest_scale.y
+	dest_scale_mat[2][2] = dest_scale.z
 
 	mat = Matrix.Translation(bone_loc) @ bone_rot.to_matrix().to_4x4()
-	mat = scale_mat @ mat
+	mat = dest_scale_mat.inverted() @ src_scale_mat @ mat
 	mat = diff_mat.inverted() @ mat @ diff_mat
 	mat = offset_mat @ mat
 	mat = mat
@@ -235,8 +244,8 @@ def drive_bone_rot(armature_name, bone_name, axis, src_vars, intermediate_bones)
 	return extract_rot_axis_from_mat(mat, axis)
 
 
-def drive_bone_loc(armature_name, bone_name, axis, src_vars):
-	mat = drive_bone_mat(armature_name, bone_name, src_vars, [])
+def drive_bone_loc(armature_name, bone_name, axis, src_vars, intermediate_bones):
+	mat = drive_bone_mat(armature_name, bone_name, src_vars, intermediate_bones)
 	return extract_loc_axis_from_mat(mat, axis)
 
 
