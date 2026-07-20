@@ -8,4 +8,4 @@ def info(text):
     logger.info(text)
     
 def warn(text):
-    logger.warn(text)
+    logger.warning(text)
