@@ -2,6 +2,9 @@ import bpy
 from difflib import SequenceMatcher
 
 
+msgbus_owner = object()
+
+
 bone_synonyms = (
 	('clavicle', 'shoulder', 'collar'),
 	('upperarm', 'uparm', 'shoulder'),
@@ -66,7 +69,12 @@ def enter_mapping_mode(ctx):
 	ctx.source.select_set(True)
 
 	bpy.ops.object.mode_set(mode='POSE')
-	bpy.app.handlers.depsgraph_update_post.append(handle_edit_change)
+	bpy.msgbus.subscribe_rna(
+		key=(bpy.types.Object, 'mode'),
+		owner=msgbus_owner,
+		args=(),
+		notify=handle_mode_change,
+	)
 
 
 def guess_mappings(ctx):
@@ -186,8 +194,7 @@ def guess_group_by_side(bones):
 
 
 def leave_mapping_mode(ctx):
-	if handle_edit_change in bpy.app.handlers.depsgraph_update_post:
-		bpy.app.handlers.depsgraph_update_post.remove(handle_edit_change)
+	bpy.msgbus.clear_by_owner(msgbus_owner)
 
 	ctx.ui_editing_mappings = False
 	ctx.get_source_armature().pose_position = 'POSE'
@@ -197,9 +204,21 @@ def leave_mapping_mode(ctx):
 	bpy.ops.object.mode_set(mode='OBJECT')
 	
 
-def handle_edit_change(self, context):
-	if bpy.context.object.mode != 'POSE':
-		leave_mapping_mode(bpy.context.object.retargeting_context)
+def handle_mode_change():
+	bpy.app.timers.register(handle_mode_change_deferred)
+
+
+def handle_mode_change_deferred():
+	for obj in bpy.data.objects:
+		if obj.type != 'ARMATURE':
+			continue
+
+		ctx = obj.retargeting_context
+
+		if ctx.ui_editing_mappings and obj.mode != 'POSE':
+			leave_mapping_mode(ctx)
+
+	return None
 
 
 def get_intermediate_bones(ctx, mapping):

@@ -2,7 +2,7 @@ bl_info = {
 	'name' : 'Animation Retargeting',
 	'author' : 'Mwni',
 	'description' : 'Retarget animations from one armature to another',
-	'version': (2, 3, 1),
+	'version': (2, 4, 0),
 	'blender' : (4, 2, 0),
 	'location' : '3D View > Tools (Right Side) > Retargeting',
 	'category' : 'Animation',
@@ -57,6 +57,9 @@ def unregister():
 
 	if post_load in bpy.app.handlers.load_post:
 		bpy.app.handlers.load_post.remove(post_load)
+
+	bpy.msgbus.clear_by_owner(mapping.msgbus_owner)
+	bpy.msgbus.clear_by_owner(alignment.msgbus_owner)
 
 
 @bpy.app.handlers.persistent

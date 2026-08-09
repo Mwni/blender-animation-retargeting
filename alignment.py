@@ -3,6 +3,9 @@ from .drivers import clear_drivers, update_drivers
 from .util import matrix_to_list, list_to_matrix
 
 
+msgbus_owner = object()
+
+
 def draw_panel(ctx, layout):
 	n = ctx.get_bone_alignments_count()
 
@@ -46,7 +49,12 @@ def enter_alignment_mode(ctx):
 			if m.target == bone.name:
 				bone.matrix_basis = list_to_matrix(m.offset)
 
-	bpy.app.handlers.depsgraph_update_post.append(handle_edit_change)
+	bpy.msgbus.subscribe_rna(
+		key=(bpy.types.Object, 'mode'),
+		owner=msgbus_owner,
+		args=(),
+		notify=handle_mode_change,
+	)
 
 
 def store_alignments(ctx):
@@ -58,8 +66,7 @@ def store_alignments(ctx):
 
 
 def leave_alignment_mode(ctx):
-	if handle_edit_change in bpy.app.handlers.depsgraph_update_post:
-		bpy.app.handlers.depsgraph_update_post.remove(handle_edit_change)
+	bpy.msgbus.clear_by_owner(msgbus_owner)
 
 	for bone in ctx.target.pose.bones:
 		for bp in ctx.target_pose_backup:
@@ -73,9 +80,21 @@ def leave_alignment_mode(ctx):
 	update_drivers(ctx)
 
 
-def handle_edit_change(self, context):
-	if bpy.context.object.mode != 'POSE':
-		leave_alignment_mode(bpy.context.object.retargeting_context)
+def handle_mode_change():
+	bpy.app.timers.register(handle_mode_change_deferred)
+
+
+def handle_mode_change_deferred():
+	for obj in bpy.data.objects:
+		if obj.type != 'ARMATURE':
+			continue
+
+		ctx = obj.retargeting_context
+
+		if ctx.ui_editing_alignment and obj.mode != 'POSE':
+			leave_alignment_mode(ctx)
+
+	return None
 
 
 
