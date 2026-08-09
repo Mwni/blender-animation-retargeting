@@ -10,17 +10,22 @@ bl_info = {
     'tracker_url': 'https://github.com/Mwni/blender-animation-retargeting/issues',
 }
 
-import bpy
-from . import context
-from . import main
-from . import mapping
-from . import alignment
-from . import corrections
-from . import baking
-from . import drivers
-from . import ik
-from . import savefile
-from importlib import reload
+if 'bpy' in locals():
+	from importlib import reload
+
+	for module in modules:
+		reload(module)
+else:
+	import bpy
+	from . import context
+	from . import main
+	from . import mapping
+	from . import alignment
+	from . import corrections
+	from . import baking
+	from . import drivers
+	from . import ik
+	from . import savefile
 
 
 modules = [
@@ -37,9 +42,6 @@ modules = [
 
 
 def register():
-	for i, module in enumerate(modules):
-		modules[i] = reload(module)
-
 	for module in modules:
 		for cls in module.classes:
 			bpy.utils.register_class(cls)
