@@ -1,6 +1,7 @@
 import os
 import bpy
 from bpy_extras.io_utils import ImportHelper
+from bpy_extras import anim_utils
 from .log import info
 
 
@@ -16,15 +17,40 @@ def draw_panel(ctx, layout):
 	layout.operator(BakingBatchFBXImportOperator.bl_idname, icon='FILE_FOLDER')
 
 
+def get_fcurves(anim):
+	if anim is None or anim.action is None or anim.action_slot is None:
+		return []
+
+	channelbag = anim_utils.action_get_channelbag_for_slot(anim.action, anim.action_slot)
+	return channelbag.fcurves if channelbag is not None else []
+
+
+def clear_action(action):
+	for layer in action.layers:
+		for strip in layer.strips:
+			for channelbag in strip.channelbags:
+				while len(channelbag.fcurves) > 0:
+					channelbag.fcurves.remove(channelbag.fcurves[0])
+
+
+def assign_action(obj, action):
+	anim = obj.animation_data
+	anim.action = action
+
+	if anim.action_slot is None:
+		if len(action.slots) == 0:
+			action.slots.new(id_type='OBJECT', name=obj.name)
+
+		anim.action_slot = action.slots[0]
+
+
 def get_keyframes(obj):
 	frames = []
-	anim = obj.animation_data
-	if anim is not None and anim.action is not None:
-		for fcu in anim.action.fcurves:
-			for keyframe in fcu.keyframe_points:
-				x, y = keyframe.co
-				if x not in frames:
-					frames.append(x)
+	for fcu in get_fcurves(obj.animation_data):
+		for keyframe in fcu.keyframe_points:
+			x, y = keyframe.co
+			if x not in frames:
+				frames.append(x)
 
 	return frames
 
@@ -46,21 +72,20 @@ def transfer_anim(ctx):
 	info('baking %s source animation into action "%s"' % (ctx.source.name, target_action_name))
 
 	if target_action != None:
-		while len(target_action.fcurves) > 0:
-			info('action "%s" already exists: deleting it' % target_action_name)
-			target_action.fcurves.remove(target_action.fcurves[0])
+		info('action "%s" already exists: clearing it' % target_action_name)
+		clear_action(target_action)
 	else:
 		target_action = bpy.data.actions.new(target_action_name)
 
-	ctx.target.animation_data.action = target_action
+	assign_action(ctx.target, target_action)
 
 	bpy.ops.object.mode_set(mode='POSE')
 
 	for target_bone in ctx.target.pose.bones:
 		if ctx.setting_bake_mapped_bones_only:
-			target_bone.bone.select = True if ctx.get_mapping_for_target(target_bone.name) else False
+			target_bone.select = True if ctx.get_mapping_for_target(target_bone.name) else False
 		else:
-			target_bone.bone.select = True
+			target_bone.select = True
 
 	bpy.ops.nla.bake(
 		frame_start=int(min(keyframes)),
@@ -73,7 +98,7 @@ def transfer_anim(ctx):
 	)
 
 	if ctx.setting_bake_linear:
-		for fc in ctx.target.animation_data.action.fcurves:
+		for fc in get_fcurves(ctx.target.animation_data):
 			for kp in fc.keyframe_points:
 				kp.interpolation = 'LINEAR'
 
@@ -99,7 +124,7 @@ class BakingBakeOperator(bpy.types.Operator):
 			title='Bake Complete',
 			icon='INFO',
 			draw_func=lambda self, ctx: (
-				self.layout.label(text='The retargeted animation has been successfully baked into the target armature. Drivers have been disabled so you can review the result animation')
+				self.layout.label(text='The retargeted animation has been successfully baked into the target armature. Drivers have been disabled so you can review the resulting animation')
 			)
 		)
 		return {'FINISHED'}

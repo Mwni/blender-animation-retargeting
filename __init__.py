@@ -3,7 +3,7 @@ bl_info = {
 	'author' : 'Mwni',
 	'description' : 'Retarget animations from one armature to another',
 	'version': (2, 4, 0),
-	'blender' : (4, 2, 0),
+	'blender' : (4, 4, 0),
 	'location' : '3D View > Tools (Right Side) > Retargeting',
 	'category' : 'Animation',
 	'wiki_url': 'https://github.com/Mwni/blender-animation-retargeting',

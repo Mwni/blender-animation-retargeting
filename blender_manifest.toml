@@ -10,7 +10,7 @@ type = "add-on"
 
 website = "https://github.com/Mwni/blender-animation-retargeting"
 tags = ["Animation", "Rigging"]
-blender_version_min = "4.2.0"
+blender_version_min = "4.4.0"
 
 [permissions]
 files = "Import/export FBX from/to disk"
