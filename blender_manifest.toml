@@ -2,7 +2,7 @@ schema_version = "1.0.0"
 
 id = "animation_retargeting"
 name = "Animation Retargeting"
-version = "2.3.1"
+version = "2.4.0"
 tagline = "Transfer animations and poses from one armature to another"
 maintainer = "Mwni"
 license = ["SPDX:GPL-3.0-or-later"]
